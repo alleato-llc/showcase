@@ -98,7 +98,18 @@ repo variables `AWS_REGION` / `AWS_SITE_ROLE_ARN`):
   (`landing/`) → `showcase.alleato.dev`, and the **live demo** (the example
   instance) → `demo.showcase.alleato.dev`.
 
-An **instance** deploys with the same flow but its own bucket/domain: its
-workflow checks this engine out as a sibling and builds with `SHOWCASE_DATA`
-pointed at the instance (so the `dist` is generated at deploy time — the
-instance stores no site code or build output).
+### Instances
+
+A portfolio is an **instance** — built from this engine, deployed to its own
+bucket/domain. Two shapes:
+
+- **Standalone** (`scripts/new-instance.sh <dir> [--data <dir>] [--domain <host>]`)
+  — scaffolds a self-contained copy of the site + a `data/` folder + a plain
+  deploy workflow. Builds/deploys on its own (`npm ci && npm run build`); pull
+  engine updates by re-running the script. Good for a single portfolio you own.
+- **Thin** — a content-only repo whose CI checks this engine out as a sibling
+  and builds with `SHOWCASE_DATA` pointed at it (the `dist` is generated at
+  deploy time; engine updates auto-flow).
+
+Either way, edit the data with this repo's CLI/GUI (`--data <instance>/data`) or
+by hand.

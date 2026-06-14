@@ -132,9 +132,11 @@ reintroduce it.
   the same aws-cli ops directly.
 - The engine deploys two sites: `landing/` → `showcase.alleato.dev`, and the
   example instance build → `demo.showcase.alleato.dev`.
-- An **instance** repo (e.g. `nycjv321/showcase`) is content-only; its deploy
-  workflow checks this engine out as a sibling and builds with `SHOWCASE_DATA`
-  pointed at itself — the `dist` is generated at deploy time, never stored.
+- Instances come in two shapes: **standalone** (scaffolded by
+  `scripts/new-instance.sh` — a self-contained site copy + `data/`, builds on
+  its own; `nycjv321/showcase` is this) or **thin** (content-only, CI checks the
+  engine out as a sibling and builds with `SHOWCASE_DATA`). The standalone reads
+  `./data` via `SHOWCASE_DATA=./data` in its npm scripts.
 - AWS resources + repo vars (`AWS_REGION`, `AWS_SITE_ROLE_ARN`) are documented
   in `INFRA.md`; they're provisioned outside the repo.
 
