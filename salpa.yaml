@@ -1,0 +1,6 @@
+# Deploys are driven by salpa (github.com/alleato-llc/salpa). This repo
+# publishes two sites from one workflow (landing + demo), so the dir and bucket
+# are supplied per run via $SALPA_DIR / $SALPA_BUCKET; salpa.yaml only carries
+# the shared option.
+deploy:
+  invalidate: true # bust the CloudFront cache (distribution found by alias == bucket)

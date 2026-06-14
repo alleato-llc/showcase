@@ -1,13 +1,10 @@
 name: Deploy
 
-# Publishes two sites on push to main, mirroring Soroban's flow (OIDC → S3 →
-# CloudFront invalidate; bucket name == domain, distribution found by alias):
-#   - the landing page  → showcase.alleato.dev
-#   - the live demo      → demo.showcase.alleato.dev   (the example instance)
-#
-# This runs `aws s3 sync` + a CloudFront invalidation directly — the same two
-# operations `salpa deploy` performs — so it needs no darwin-only salpa binary.
-# Auth is short-lived OIDC (no stored keys). See INFRA.md for the AWS setup.
+# On push to main: publish the landing page → showcase.alleato.dev and the live
+# demo (example instance) → demo.showcase.alleato.dev. salpa owns the deploy
+# (s3 sync + CloudFront invalidate); two runs, one per site, with dir/bucket
+# supplied via $SALPA_DIR / $SALPA_BUCKET (salpa >= 0.1.10). Auth is short-lived
+# OIDC. See INFRA.md for the AWS setup.
 on:
   push:
     branches: [main]
@@ -18,12 +15,14 @@ on:
       - "schema/**"
       - "package.json"
       - "package-lock.json"
+      - "salpa.yaml"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 permissions:
   id-token: write # assume the deploy role via OIDC
   contents: read
+  packages: read # pull salpa from ghcr
 
 concurrency:
   group: deploy
@@ -31,8 +30,6 @@ concurrency:
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
-  LANDING_DOMAIN: showcase.alleato.dev
-  DEMO_DOMAIN: demo.showcase.alleato.dev
 
 jobs:
   deploy:
@@ -51,7 +48,14 @@ jobs:
           npm ci
           SHOWCASE_DATA="$PWD/examples/default" npm run build
 
-      # The Actions logs are public — mask the account id from the role ARN.
+      - uses: oras-project/setup-oras@v1
+      - name: Fetch salpa
+        run: |
+          echo "${{ github.token }}" | oras login ghcr.io -u "${{ github.actor }}" --password-stdin
+          oras pull ghcr.io/alleato-llc/salpa:0.1.10
+          chmod +x salpa-linux-amd64
+          sudo mv salpa-linux-amd64 /usr/local/bin/salpa
+
       - name: Mask account id
         env:
           ROLE_ARN: ${{ vars.AWS_SITE_ROLE_ARN }}
@@ -65,25 +69,13 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy landing page
-        run: |
-          aws s3 sync landing "s3://$LANDING_DOMAIN" --delete
-          DIST=$(aws cloudfront list-distributions \
-            --query "DistributionList.Items[?contains(Aliases.Items, '$LANDING_DOMAIN')].Id | [0]" \
-            --output text)
-          if [ -n "$DIST" ] && [ "$DIST" != "None" ]; then
-            aws cloudfront create-invalidation --distribution-id "$DIST" --paths "/*"
-          else
-            echo "::warning::no CloudFront distribution aliased to $LANDING_DOMAIN"
-          fi
+        env:
+          SALPA_DIR: landing
+          SALPA_BUCKET: showcase.alleato.dev
+        run: salpa deploy
 
       - name: Deploy live demo
-        run: |
-          aws s3 sync packages/site/dist "s3://$DEMO_DOMAIN" --delete
-          DIST=$(aws cloudfront list-distributions \
-            --query "DistributionList.Items[?contains(Aliases.Items, '$DEMO_DOMAIN')].Id | [0]" \
-            --output text)
-          if [ -n "$DIST" ] && [ "$DIST" != "None" ]; then
-            aws cloudfront create-invalidation --distribution-id "$DIST" --paths "/*"
-          else
-            echo "::warning::no CloudFront distribution aliased to $DEMO_DOMAIN"
-          fi
+        env:
+          SALPA_DIR: packages/site/dist
+          SALPA_BUCKET: demo.showcase.alleato.dev
+        run: salpa deploy

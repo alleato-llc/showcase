@@ -50,9 +50,21 @@ Actions → Variables):
 
 No secrets are required — OIDC issues short-lived credentials at run time.
 
+## salpa
+
+The deploy is driven by [`salpa`](https://github.com/alleato-llc/salpa)
+(>= 0.1.10), pulled from `ghcr.io/alleato-llc/salpa` in the workflow. Each run
+sets `$SALPA_DIR` + `$SALPA_BUCKET` and salpa does `aws s3 sync --delete` +
+CloudFront invalidate. The workflows declare `permissions: packages: read` and
+`oras login` with the job token — so the **salpa ghcr package must be readable**
+by each deploying repo (make it public, or grant the org/repos read access).
+This is especially relevant for the instance repo (`nycjv321/showcase`), which
+pulls salpa from a different org (`alleato-llc`).
+
 ## Instances
 
 A portfolio **instance** (e.g. `nycjv321/showcase` → `showcase.javierlvelasquez.com`)
-uses the same pattern with its own bucket/distribution/role in its own account;
-its workflow checks this engine out as a sibling and builds with
-`SHOWCASE_DATA` pointed at the instance.
+uses the same pattern with its own bucket/distribution/role in its own account.
+A **standalone** instance (scaffolded by `scripts/new-instance.sh`) builds and
+deploys on its own (one bucket); a **thin** instance checks this engine out as a
+sibling and builds with `SHOWCASE_DATA`.
