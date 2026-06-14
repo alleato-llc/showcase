@@ -37,8 +37,30 @@ schema/
   projects.schema.json # the contract for an entry; keep site types + Go model in sync with it
   README.md            # data-model docs
 examples/default/      # sample instance: projects.json + config.json
-tool/                  # Go module: shared core + cobra CLI + Wails GUI (in progress)
+tool/                  # Go module (github.com/nycjv321/showcase/tool)
+  internal/model       # Project types + Validate() — mirrors the schema
+  internal/store       # atomic load/save of projects.json
+  cmd/showcase         # stdlib CLI (list/add/edit/rm/move/validate/fmt)
+  gui/                 # Wails desktop app — shares model+store
+    app.go             # bound methods (List/Save/Validate/DataDir/ChooseDataDir)
+    main.go            # wails.Run; //go:embed all:frontend/dist
+    frontend/          # Preact + Vite + TS editor (list, forms, emoji picker, live preview)
 ```
+
+## Tool build/run
+
+- CLI: `cd tool && go build -o bin/showcase ./cmd/showcase`, run from the repo
+  root so the default `examples/default` resolves (or pass `--data`).
+- GUI: `cd tool/gui && wails dev` (run) or `wails build` (package). Both build
+  the frontend first.
+- Gotcha: `main.go` has `//go:embed all:frontend/dist`, so **building/vetting
+  `./gui` requires `tool/gui/frontend/dist` to exist** — run
+  `npm --prefix tool/gui/frontend run build` (or any `wails` command) first.
+  `frontend/dist` is gitignored (a build artifact). Building `./cmd/...` and
+  `./internal/...` (the CLI + core) needs no frontend.
+- The frontend's `src/api.ts` calls Go via `window.go.main.App.*` when running
+  under Wails, and falls back to bundled `sample.ts` when run standalone in a
+  browser (handy for dev/screenshots).
 
 ## Data flow (engine ↔ instance)
 

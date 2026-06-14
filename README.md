@@ -44,13 +44,28 @@ SHOWCASE_DATA=../javier-showcase npm run build # build an instance's data
 
 ## Editing entries
 
-Today: edit `projects.json` directly (see **[`schema/README.md`](schema/README.md)**
-for the field reference and link model — `site`/`repo`, `links[]`, and
-`implementations[]`).
+A **Go tool** in `tool/` — one shared core (`internal/model` + `internal/store`)
+exposed as both a CLI and a Wails desktop GUI — edits an instance's
+`projects.json`, validating against `schema/projects.schema.json`. (You can also
+still hand-edit the JSON; see **[`schema/README.md`](schema/README.md)** for the
+field reference.)
 
-Coming: a **Go tool** (`tool/`) — one shared core exposed as both a **CLI** and
-a **Wails desktop GUI** — to add/edit/reorder/validate entries against
-`schema/projects.schema.json`, with an emoji picker and live preview in the GUI.
+**CLI:**
+
+```bash
+cd tool && go build -o bin/showcase ./cmd/showcase   # build once
+./tool/bin/showcase list                              # from the repo root
+./tool/bin/showcase add --title … --emoji 🧪 --headline "…" --repo …
+./tool/bin/showcase edit 3        # also: rm, move, validate, fmt
+# every command takes --data DIR (default $SHOWCASE_DATA, else examples/default)
+```
+
+**GUI** (drag-reorder, emoji picker, live preview):
+
+```bash
+cd tool/gui && wails dev      # run the editor
+cd tool/gui && wails build    # build a desktop app → tool/gui/build/bin
+```
 
 ## Theming
 
