@@ -87,3 +87,18 @@ defaults. The projects table is also a resizable "sheet" (drag the border,
 `npm run build` emits a static `packages/site/dist`. The flat-file build format
 (`build: { format: "file" }`) makes extensionless URLs resolve on hosts that
 append `.html`. Point `SHOWCASE_DATA` at an instance to build that portfolio.
+
+This repo's own sites publish via GitHub Actions (OIDC → S3 → CloudFront
+invalidate; see **[`INFRA.md`](INFRA.md)** for the AWS prerequisites and the two
+repo variables `AWS_REGION` / `AWS_SITE_ROLE_ARN`):
+
+- **`.github/workflows/ci.yml`** — on branches/PRs: Go build/vet/test + Astro
+  build + GUI frontend build.
+- **`.github/workflows/deploy.yml`** — on `main`: the **landing page**
+  (`landing/`) → `showcase.alleato.dev`, and the **live demo** (the example
+  instance) → `demo.showcase.alleato.dev`.
+
+An **instance** deploys with the same flow but its own bucket/domain: its
+workflow checks this engine out as a sibling and builds with `SHOWCASE_DATA`
+pointed at the instance (so the `dist` is generated at deploy time — the
+instance stores no site code or build output).

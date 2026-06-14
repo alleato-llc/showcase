@@ -118,10 +118,25 @@ reintroduce it.
   that append `.html`. Don't switch to directory format.
 - **`@property` inheritance**: a registered custom property a `::before` must
   read needs `inherits: true` (past bug).
-- Self-hosted fonts only, under `packages/site/public/fonts/`, preloaded.
-- Light-only effects stay behind `:root[data-theme="light"]`; dark is flat.
-- Keep `schema/projects.schema.json`, `content.ts` types, and the Go model in
-  agreement — it's the cross-language contract.
+- Self-hosted fonts only, under `packages/site/public/fonts/`, preloaded; web
+  fonts in `themes.json` use the font `name` as the `@font-face` family.
+- Themes are data (`themes.json`) — no palette values or decorations in
+  `global.css`. Keep the schemas (`projects` + `themes`), `content.ts` types,
+  and the Go model in agreement — they're the cross-language contracts.
+
+## Deploy / infra
+
+- `.github/workflows/ci.yml` (branches/PRs) and `deploy.yml` (main) publish via
+  GitHub OIDC → `aws s3 sync --delete` → CloudFront invalidate-by-alias (bucket
+  name == domain). Mirrors Soroban; `salpa`'s darwin-only binary is replaced by
+  the same aws-cli ops directly.
+- The engine deploys two sites: `landing/` → `showcase.alleato.dev`, and the
+  example instance build → `demo.showcase.alleato.dev`.
+- An **instance** repo (e.g. `nycjv321/showcase`) is content-only; its deploy
+  workflow checks this engine out as a sibling and builds with `SHOWCASE_DATA`
+  pointed at itself — the `dist` is generated at deploy time, never stored.
+- AWS resources + repo vars (`AWS_REGION`, `AWS_SITE_ROLE_ARN`) are documented
+  in `INFRA.md`; they're provisioned outside the repo.
 
 ## Visual verification
 
