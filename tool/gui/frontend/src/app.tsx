@@ -1,42 +1,64 @@
-import { useEffect, useMemo, useState } from "preact/hooks";
-import type { Implementation, LinkSpec, Project } from "./types";
+import { useEffect, useState } from "preact/hooks";
+import type { Implementation, LinkSpec, Project, ThemeColors, ThemeSettings } from "./types";
 import {
   chooseDataDir,
   dataDir,
   isWails,
   listProjects,
+  loadThemes,
   saveProjects,
+  saveThemes,
   validateProjects,
+  validateThemes,
 } from "./api";
 import { emojiGroups } from "./emoji";
 import { Preview } from "./preview";
+import { ThemesPanel } from "./themes";
 
 const blank = (): Project => ({ title: "", emoji: "❓", headline: "" });
 
+const FALLBACK: ThemeColors = {
+  bg: "#1e1e2e", surface: "#2a2a3a", text: "#eee", muted: "#aaa", faint: "#777",
+  accent: "#ff79c6", error: "#f55", border: "rgba(255,255,255,0.1)", shadow: "rgba(0,0,0,0.3)",
+};
+
 export function App() {
+  const [view, setView] = useState<"projects" | "themes">("projects");
   const [projects, setProjects] = useState<Project[]>([]);
   const [sel, setSel] = useState(-1);
+  const [settings, setSettings] = useState<ThemeSettings | null>(null);
+  const [themeSel, setThemeSel] = useState(0);
+  const [previewTheme, setPreviewTheme] = useState("");
   const [dir, setDir] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [status, setStatus] = useState("");
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [drag, setDrag] = useState<number | null>(null);
 
+  const load = async () => {
+    setDir(await dataDir());
+    const p = await listProjects();
+    setProjects(p);
+    setSel(p.length ? 0 : -1);
+    const s = await loadThemes();
+    setSettings(s);
+    setPreviewTheme(s.default);
+    setStatus("");
+    setErrors([]);
+  };
   useEffect(() => {
-    (async () => {
-      setDir(await dataDir());
-      const p = await listProjects();
-      setProjects(p);
-      setSel(p.length ? 0 : -1);
-    })();
+    load();
   }, []);
 
   const current = sel >= 0 ? projects[sel] : undefined;
-
-  const mutate = (next: Project[]) => {
-    setProjects(next);
+  const dirty = () => {
     setStatus("Unsaved changes");
     setErrors([]);
+  };
+
+  // ---- projects mutations ----
+  const mutate = (next: Project[]) => {
+    setProjects(next);
+    dirty();
   };
   const update = (patch: Partial<Project>) => {
     if (sel < 0) return;
@@ -44,7 +66,6 @@ export function App() {
     next[sel] = { ...next[sel], ...patch };
     mutate(next);
   };
-
   const addProject = () => {
     const next = [...projects, blank()];
     mutate(next);
@@ -65,35 +86,60 @@ export function App() {
     setSel(to);
   };
 
+  // ---- theme mutations ----
+  const updateSettings = (s: ThemeSettings) => {
+    setSettings(s);
+    dirty();
+  };
+
+  // ---- save / validate (context-aware) ----
   const save = async () => {
-    const errs = await validateProjects(projects);
-    setErrors(errs);
-    if (errs.length) {
-      setStatus("Fix validation errors before saving");
-      return;
+    if (view === "themes" && settings) {
+      const errs = await validateThemes(settings);
+      setErrors(errs);
+      if (errs.length) return setStatus("Fix theme errors before saving");
+      await saveThemes(settings);
+    } else {
+      const errs = await validateProjects(projects);
+      setErrors(errs);
+      if (errs.length) return setStatus("Fix validation errors before saving");
+      await saveProjects(projects);
     }
-    await saveProjects(projects);
     setStatus("Saved ✓");
   };
   const validate = async () => {
-    const errs = await validateProjects(projects);
+    const errs =
+      view === "themes" && settings
+        ? await validateThemes(settings)
+        : await validateProjects(projects);
     setErrors(errs);
     setStatus(errs.length ? `${errs.length} problem(s)` : "Valid ✓");
   };
   const pickDir = async () => {
-    const d = await chooseDataDir();
-    setDir(d);
-    const p = await listProjects();
-    setProjects(p);
-    setSel(p.length ? 0 : -1);
-    setStatus("");
-    setErrors([]);
+    await chooseDataDir();
+    await load();
   };
+
+  const previewColors: ThemeColors = !settings
+    ? FALLBACK
+    : view === "themes"
+      ? (settings.themes[themeSel]?.colors ?? FALLBACK)
+      : (settings.themes.find((t) => t.id === previewTheme)?.colors ??
+        settings.themes[0]?.colors ??
+        FALLBACK);
 
   return (
     <div class="editor">
       <header class="bar">
-        <strong>Showcase Editor</strong>
+        <strong>Showcase</strong>
+        <div class="tabs">
+          <button class={view === "projects" ? "on" : ""} onClick={() => setView("projects")}>
+            Projects
+          </button>
+          <button class={view === "themes" ? "on" : ""} onClick={() => setView("themes")}>
+            Themes
+          </button>
+        </div>
         <span class="dir" title={dir}>{dir}</span>
         <span class="spacer" />
         {isWails && (
@@ -116,66 +162,80 @@ export function App() {
         </ul>
       )}
 
-      <div class="cols">
-        <aside class="list">
-          <div class="list-head">
-            <span>{projects.length} projects</span>
-            <button onClick={addProject}>+ Add</button>
-          </div>
-          <ul>
-            {projects.map((p, i) => (
-              <li
-                class={"row" + (i === sel ? " active" : "") + (drag === i ? " dragging" : "")}
-                draggable
-                onClick={() => setSel(i)}
-                onDragStart={() => setDrag(i)}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={() => {
-                  if (drag !== null) reorder(drag, i);
-                  setDrag(null);
-                }}
-                onDragEnd={() => setDrag(null)}
-              >
-                <span class="grip">⠿</span>
-                <span class="row-emoji">{p.emoji}</span>
-                <span class="row-title">{p.title || <em>untitled</em>}</span>
-                <button
-                  class="del"
-                  title="Delete"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeProject(i);
+      {view === "projects" ? (
+        <div class="cols">
+          <aside class="list">
+            <div class="list-head">
+              <span>{projects.length} projects</span>
+              <button onClick={addProject}>+ Add</button>
+            </div>
+            <ul>
+              {projects.map((p, i) => (
+                <li
+                  class={"row" + (i === sel ? " active" : "") + (drag === i ? " dragging" : "")}
+                  draggable
+                  onClick={() => setSel(i)}
+                  onDragStart={() => setDrag(i)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={() => {
+                    if (drag !== null) reorder(drag, i);
+                    setDrag(null);
                   }}
+                  onDragEnd={() => setDrag(null)}
                 >
-                  ✕
-                </button>
-              </li>
-            ))}
-          </ul>
-        </aside>
+                  <span class="grip">⠿</span>
+                  <span class="row-emoji">{p.emoji}</span>
+                  <span class="row-title">{p.title || <em>untitled</em>}</span>
+                  <button
+                    class="del"
+                    title="Delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeProject(i);
+                    }}
+                  >
+                    ✕
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </aside>
 
-        <section class="form">
-          {current ? (
-            <Editor project={current} update={update} />
-          ) : (
-            <p class="empty">No project selected. Click “+ Add” to create one.</p>
-          )}
-        </section>
-      </div>
+          <section class="form">
+            {current ? (
+              <Editor project={current} update={update} />
+            ) : (
+              <p class="empty">No project selected. Click “+ Add” to create one.</p>
+            )}
+          </section>
+        </div>
+      ) : settings ? (
+        <ThemesPanel
+          settings={settings}
+          onChange={updateSettings}
+          sel={themeSel}
+          setSel={setThemeSel}
+        />
+      ) : (
+        <p class="empty">Loading…</p>
+      )}
 
       <section class="preview-pane">
         <div class="preview-head">
           <span>Live preview</span>
-          <div class="seg-toggle">
-            <button class={theme === "light" ? "on" : ""} onClick={() => setTheme("light")}>
-              Light
-            </button>
-            <button class={theme === "dark" ? "on" : ""} onClick={() => setTheme("dark")}>
-              Dark
-            </button>
-          </div>
+          {view === "projects" && settings && (
+            <select
+              class="preview-theme"
+              value={previewTheme}
+              onChange={(e) => setPreviewTheme((e.target as HTMLSelectElement).value)}
+            >
+              {settings.themes.map((t) => (
+                <option value={t.id}>{t.name}</option>
+              ))}
+            </select>
+          )}
         </div>
-        <Preview projects={projects} theme={theme} />
+        <Preview projects={projects} colors={previewColors} />
       </section>
     </div>
   );

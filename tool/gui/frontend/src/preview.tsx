@@ -1,4 +1,4 @@
-import type { Project } from "./types";
+import type { Project, ThemeColors } from "./types";
 
 interface Pill {
   label: string;
@@ -21,13 +21,25 @@ function topLinks(p: Project): Pill[] {
 
 export function Preview({
   projects,
-  theme,
+  colors,
 }: {
   projects: Project[];
-  theme: "light" | "dark";
+  colors: ThemeColors;
 }) {
+  // apply the theme's palette as inline CSS variables so the preview reflects
+  // whatever theme is selected/being edited, live
+  const style = {
+    "--bg": colors.bg,
+    "--surface": colors.surface,
+    "--text": colors.text,
+    "--muted": colors.muted,
+    "--faint": colors.faint,
+    "--accent": colors.accent,
+    "--border": colors.border,
+    "--name": colors.accent,
+  } as Record<string, string>;
   return (
-    <div class="preview" data-theme={theme}>
+    <div class="preview" style={style}>
       <table class="pv-table">
         <thead>
           <tr>

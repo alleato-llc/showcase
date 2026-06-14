@@ -304,26 +304,7 @@ select:focus {
   overflow: auto;
   padding: 1rem;
 }
-.preview[data-theme="light"] {
-  --bg: #fcf9ee;
-  --surface: #ffffff;
-  --text: #073642;
-  --muted: #657b83;
-  --faint: #93a1a1;
-  --accent: #268bd2;
-  --border: rgba(7, 54, 66, 0.12);
-  --name: #073642;
-}
-.preview[data-theme="dark"] {
-  --bg: #1e1e2e;
-  --surface: #343746;
-  --text: #f8f8f2;
-  --muted: #bd93f9;
-  --faint: #6272a4;
-  --accent: #ff79c6;
-  --border: rgba(248, 248, 242, 0.12);
-  --name: #ff79c6;
-}
+/* palette comes from inline CSS vars set by <Preview colors={…}> */
 .preview {
   background: var(--bg);
   border-radius: 10px;
@@ -410,4 +391,79 @@ select:focus {
   background: var(--surface);
   color: var(--muted);
   border-left: 1px solid var(--border);
+}
+
+/* ---------- tabs ---------- */
+.bar .tabs {
+  display: inline-flex;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.bar .tabs button {
+  border: none;
+  border-radius: 0;
+  background: var(--ui-panel);
+  padding: 0.3rem 0.7rem;
+}
+.bar .tabs button.on {
+  background: var(--ui-accent);
+  color: #0c1322;
+  font-weight: 600;
+}
+
+/* ---------- themes editor ---------- */
+.row .swatch {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 3px;
+  border: 1px solid var(--ui-line);
+  flex: none;
+}
+.row .mode-badge {
+  font-size: 0.66rem;
+  color: var(--ui-muted);
+  border: 1px solid var(--ui-line);
+  border-radius: 999px;
+  padding: 0 0.4rem;
+}
+.default-pick {
+  padding: 0.4rem 0.6rem 0.8rem;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem 0.8rem;
+}
+.color-row {
+  display: grid;
+  grid-template-columns: 4.5rem 1.8rem 1fr;
+  align-items: center;
+  gap: 0.4rem;
+}
+.color-key {
+  font-size: 0.78rem;
+  color: var(--ui-muted);
+}
+.swatch-input {
+  width: 1.8rem;
+  height: 1.7rem;
+  padding: 0;
+  border: 1px solid var(--ui-line);
+  border-radius: 5px;
+  background: none;
+  cursor: pointer;
+}
+.hex {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.8rem;
+}
+.font-row {
+  grid-template-columns: 7rem 1fr 9rem auto;
+}
+.preview-theme {
+  width: auto;
+  background: var(--ui-panel-2);
+  padding: 0.2rem 0.5rem;
 }
