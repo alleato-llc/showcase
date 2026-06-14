@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
-import ThemeToggle from "../components/ThemeToggle.tsx";
-import { config } from "../lib/content";
+import Settings from "../components/Settings.tsx";
+import { config, themeSettings, type ThemeColors } from "../lib/content";
 
 interface Props {
   title: string;
@@ -11,6 +11,31 @@ interface Props {
 const { title, description } = Astro.props;
 const year = new Date().getFullYear();
 const copyright = config.copyright ?? config.name;
+
+// Build the per-theme palette blocks and @font-face rules from themes.json, so
+// themes/fonts are data. The gear (and the pre-paint script) switch between
+// them by setting data-theme and --font-display.
+const { themes, fonts } = themeSettings;
+const vars = (c: ThemeColors) =>
+  `--bg:${c.bg};--surface:${c.surface};--text:${c.text};--muted:${c.muted};` +
+  `--faint:${c.faint};--accent:${c.accent};--error:${c.error};` +
+  `--border:${c.border};--shadow:${c.shadow};`;
+const themeCss = themes.map((t) => `:root[data-theme="${t.id}"]{${vars(t.colors)}}`).join("");
+const fontFaceCss = fonts
+  .filter((f) => f.url)
+  .map(
+    (f) =>
+      `@font-face{font-family:"${f.family ?? f.name}";src:url("${f.url}") format("woff2");` +
+      `font-weight:${f.weight ?? "400"};font-style:normal;font-display:swap;}`,
+  )
+  .join("");
+
+// Data the flash-free init + the gear island need.
+const themeIds = themes.map((t) => t.id);
+const fontStacks = Object.fromEntries(fonts.map((f) => [f.id, f.stack]));
+const defaultTheme = themeSettings.default;
+const defaultFont = themeSettings.defaultFont;
+const preloadFont = fonts.find((f) => f.id === defaultFont && f.url)?.url;
 ---
 
 <!doctype html>
@@ -23,26 +48,22 @@ const copyright = config.copyright ?? config.name;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link
-      rel="preload"
-      href="/fonts/caveat.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <script is:inline>
-      // Resolve the theme BEFORE first paint: stored choice wins, otherwise
-      // follow the system — and keep following it live until the user picks.
+    {
+      preloadFont && (
+        <link rel="preload" href={preloadFont} as="font" type="font/woff2" crossorigin />
+      )
+    }
+    <style set:html={fontFaceCss + themeCss}></style>
+    <script is:inline define:vars={{ themeIds, fontStacks, defaultTheme, defaultFont }}>
+      // Apply the stored (or default) theme + font BEFORE first paint, so there
+      // is no flash. Palettes are defined per data-theme in the injected style.
       (() => {
-        const saved = localStorage.getItem("showcase-theme");
-        const media = matchMedia("(prefers-color-scheme: dark)");
-        const apply = (mode) => (document.documentElement.dataset.theme = mode);
-        apply(saved ?? (media.matches ? "dark" : "light"));
-        media.addEventListener("change", (e) => {
-          if (!localStorage.getItem("showcase-theme")) {
-            apply(e.matches ? "dark" : "light");
-          }
-        });
+        const root = document.documentElement;
+        const t = localStorage.getItem("showcase-theme");
+        root.dataset.theme = t && themeIds.includes(t) ? t : defaultTheme;
+        const f = localStorage.getItem("showcase-font");
+        const stack = fontStacks[f] ?? fontStacks[defaultFont];
+        if (stack) root.style.setProperty("--font-display", stack);
       })();
     </script>
   </head>
@@ -53,7 +74,7 @@ const copyright = config.copyright ?? config.name;
         <nav>
           {(config.nav ?? []).map((link) => <a href={link.href}>{link.label}</a>)}
         </nav>
-        <ThemeToggle client:load />
+        <Settings themes={themes} fonts={fonts} client:load />
       </div>
     </header>
 

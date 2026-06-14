@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/nycjv321/showcase/schema/themes.schema.json",
+  "title": "Showcase themes",
+  "description": "An instance's themes.json: the selectable color themes and display fonts. Shared by the site (TypeScript) and the tool (Go).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["default", "defaultFont", "themes", "fonts"],
+  "properties": {
+    "default": { "type": "string", "description": "id of the default theme" },
+    "defaultFont": { "type": "string", "description": "id of the default font" },
+    "themes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/theme" }
+    },
+    "fonts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/font" }
+    }
+  },
+  "definitions": {
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "mode", "colors"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "mode": { "type": "string", "enum": ["light", "dark"] },
+        "colors": { "$ref": "#/definitions/colors" }
+      }
+    },
+    "colors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bg", "surface", "text", "muted", "faint", "accent", "error", "border", "shadow"],
+      "properties": {
+        "bg": { "type": "string" },
+        "surface": { "type": "string" },
+        "text": { "type": "string" },
+        "muted": { "type": "string" },
+        "faint": { "type": "string" },
+        "accent": { "type": "string" },
+        "error": { "type": "string" },
+        "border": { "type": "string" },
+        "shadow": { "type": "string" }
+      }
+    },
+    "font": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "stack"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "stack": { "type": "string", "minLength": 1, "description": "CSS font-family stack" },
+        "family": { "type": "string", "description": "@font-face family-name (web fonts)" },
+        "url": { "type": "string", "description": "woff2 URL to load (web fonts)" },
+        "weight": { "type": "string", "description": "font-weight or range, e.g. \"400 700\"" }
+      }
+    }
+  }
+}

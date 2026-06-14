@@ -69,18 +69,18 @@ cd tool/gui && wails build    # build a desktop app → tool/gui/build/bin
 
 ## Theming
 
-Two palettes via a `data-theme` attribute (resolved before first paint; stored
-choice wins, else system):
+Themes and fonts are **instance data** in `themes.json` (a list of color themes
+and selectable display fonts; schema in `schema/themes.schema.json`). The header
+**gear** lets visitors switch theme + font (saved per-browser); the instance
+sets the defaults. Add/edit/delete themes in the admin GUI, or hand-edit
+`themes.json`.
 
-- **Light — Solarized Light**, styled as a composition notebook (paper grain,
-  ruled table + red margin rule, Caveat handwriting on header/hero/footer).
-  Notebook treatments are light-theme only.
-- **Dark — Dracula** on a darkened `#1e1e2e` base; project names take the
-  accent pink.
-
-All colors are CSS custom properties at the top of
-`packages/site/src/styles/global.css`. The projects table is a resizable
-"sheet" (drag the border, 40%–85%; double-click to reset to 85%).
+Each theme is a palette (`bg`, `surface`, `text`, `muted`, `faint`, `accent`,
+`error`, `border`, `shadow`) the site emits as `:root[data-theme="<id>"]` CSS
+variables; the chosen display font (system, serif, mono, the bundled Caveat, or
+your own) drives `--font-display`. The engine ships Solarized Light + Dracula as
+defaults. The projects table is also a resizable "sheet" (drag the border,
+40%–85%; double-click to reset to 85%).
 
 ## Deployment
 

@@ -1,49 +1,11 @@
-/* Caveat — a self-hosted handwriting font (latin subset, variable weight) for
-   the wordmark and hero headings, like a name written on a notebook cover. */
-@font-face {
-  font-family: "Caveat";
-  src: url("/fonts/caveat.woff2") format("woff2");
-  font-weight: 400 700;
-  font-style: normal;
-  font-display: swap;
-}
-
+/* Theme palettes (--bg/--surface/--text/--muted/--faint/--accent/--error/
+   --border/--shadow) are injected per theme by Layout.astro from the
+   instance's themes.json — one `:root[data-theme="<id>"]` block each — so
+   themes are data, not code. Web fonts (@font-face) are emitted there too.
+   This file holds only structure + the switchable display font, which the
+   gear menu sets at runtime via --font-display. */
 :root {
-  --font-hand: "Caveat", "Segoe Script", "Bradley Hand", cursive;
-}
-
-/* Light: Solarized Light (Ethan Schoonover). Dark: Dracula, on a darkened
-   #1e1e2e base. `data-theme` is set before first paint by the inline script in
-   Layout.astro; with no stored choice it follows the system. */
-
-:root,
-:root[data-theme="light"] {
-  --bg: #fcf9ee;          /* pearl/cream notebook paper (was #fdf6e3) */
-  --surface: #ffffff;     /* cards & table sit on the paper as clean white */
-  --text: #073642;        /* resultText — ink */
-  --muted: #657b83;       /* expressionText */
-  --faint: #93a1a1;       /* secondaryText */
-  --accent: #268bd2;      /* accent */
-  --error: #dc322f;       /* errorText */
-  --border: rgba(7, 54, 66, 0.1);
-  --shadow: rgba(7, 54, 66, 0.05);
-  /* notebook ruling inside the table — blue rules between rows, a soft red
-     margin line down the emoji column. Light theme only (see the table
-     rules below). */
-  --rule: rgba(38, 139, 210, 0.2);
-  --margin-line: rgba(220, 50, 47, 0.3);
-}
-
-:root[data-theme="dark"] {
-  --bg: #1e1e2e;          /* darkened base (classic Dracula uses #282a36) */
-  --surface: #343746;     /* Dracula inputBackground */
-  --text: #f8f8f2;        /* Dracula foreground */
-  --muted: #bd93f9;       /* Dracula purple */
-  --faint: #6272a4;       /* Dracula comment */
-  --accent: #ff79c6;      /* Dracula neon pink */
-  --error: #ff5555;       /* Dracula red */
-  --border: rgba(248, 248, 242, 0.1);
-  --shadow: rgba(0, 0, 0, 0.3);
+  --font-display: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 * {
@@ -53,15 +15,6 @@
 html {
   scroll-behavior: smooth;
   overflow-x: clip;
-}
-
-/* Paper grain, light theme only: a faint procedural noise (inline SVG
-   turbulence, no asset) over the warm paper tone, so the page reads as a
-   real sheet rather than a flat fill. Dark/Dracula stays flat. */
-:root[data-theme="light"] body {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27160%27%3E%3Cfilter%20id%3D%27n%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.85%27%20numOctaves%3D%272%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.5%20%200%200%200%200%200.5%20%200%200%200%200%200.5%20%200%200%200%200.25%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20filter%3D%27url%28%23n%29%27%2F%3E%3C%2Fsvg%3E");
-  background-repeat: repeat;
-  background-size: 160px 160px;
 }
 
 body {
@@ -108,16 +61,6 @@ header.site {
   border-bottom: 1px solid var(--border);
 }
 
-/* The sticky header has its own translucent paper background, so it
-   doesn't sit over the body grain the way the transparent footer does.
-   Give it the same grain so the whole frame reads as one sheet. */
-:root[data-theme="light"] header.site {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27160%27%3E%3Cfilter%20id%3D%27n%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.85%27%20numOctaves%3D%272%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.5%20%200%200%200%200%200.5%20%200%200%200%200%200.5%20%200%200%200%200.25%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20filter%3D%27url%28%23n%29%27%2F%3E%3C%2Fsvg%3E");
-  background-repeat: repeat;
-  background-size: 160px 160px;
-}
-
-
 header.site .wrap {
   display: flex;
   align-items: center;
@@ -126,7 +69,7 @@ header.site .wrap {
 }
 
 .wordmark {
-  font-family: var(--font-hand);
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.5rem;
   line-height: 1;
@@ -142,7 +85,7 @@ header.site nav {
   display: flex;
   gap: 1.1rem;
   margin-left: auto;
-  font-family: var(--font-hand);
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: 1.15rem;
 }
@@ -151,20 +94,79 @@ header.site nav a {
   color: var(--muted);
 }
 
-.theme-toggle {
+/* settings gear (replaces the old light/dark toggle) + its popover */
+.settings {
+  position: relative;
+}
+
+.gear {
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--muted);
   border-radius: 8px;
   width: 2rem;
   height: 2rem;
-  font-size: 0.95rem;
+  font-size: 1rem;
   cursor: pointer;
   line-height: 1;
 }
 
-.theme-toggle:hover {
+.gear:hover {
   color: var(--text);
+}
+
+.settings-menu {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 30;
+  min-width: 12rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px var(--shadow);
+  padding: 0.4rem;
+}
+
+.settings-section + .settings-section {
+  margin-top: 0.35rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.35rem;
+}
+
+.settings-label {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--faint);
+  padding: 0.25rem 0.5rem;
+}
+
+.settings-opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 0.34rem 0.55rem;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.settings-opt:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.settings-opt.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.settings-opt.active::before {
+  content: "✓ ";
 }
 
 @media (max-width: 600px) {
@@ -180,7 +182,7 @@ header.site nav a {
     white-space: nowrap;
   }
 
-  .theme-toggle {
+  .settings {
     margin-left: auto;
   }
 
@@ -202,7 +204,7 @@ header.site nav a {
 }
 
 .hero h1 {
-  font-family: var(--font-hand);
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: clamp(3rem, 7vw, 4.4rem);
   line-height: 1.05;
@@ -211,7 +213,7 @@ header.site nav a {
 }
 
 .hero p.tag {
-  font-family: var(--font-hand);
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: clamp(1.4rem, 3vw, 1.9rem);
   color: var(--muted);
@@ -220,19 +222,13 @@ header.site nav a {
 }
 
 .hero p.sub {
-  font-family: var(--font-hand);
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: 1.3rem;
   line-height: 1.35;
   color: var(--muted);
   max-width: 34em;
   margin: 0 auto;
-}
-
-/* Dark theme: the project names take the accent pink so they stand out from
-   the purple descriptions. Light/notebook keeps its ink-on-paper titles. */
-:root[data-theme="dark"] .project-table td.title .no-link {
-  color: var(--accent);
 }
 
 /* ---------- projects table ---------- */
@@ -316,19 +312,6 @@ section.projects {
   background: color-mix(in srgb, var(--accent) 6%, transparent);
 }
 
-/* Composition-notebook ruling, light theme only: the row dividers become
-   blue ruled lines, and the emoji column's right edge becomes a red margin
-   line running the height of the table. Dark theme keeps its subtle borders. */
-:root[data-theme="light"] .project-table thead th,
-:root[data-theme="light"] .project-table tbody td {
-  border-bottom-color: var(--rule);
-}
-
-:root[data-theme="light"] .project-table thead th:first-child,
-:root[data-theme="light"] .project-table td.emoji {
-  border-right: 1px solid var(--margin-line);
-}
-
 /* emoji cell: fixed, centered, a touch larger */
 .project-table td.emoji {
   width: 2.5rem;
@@ -344,7 +327,7 @@ section.projects {
 
 .project-table td.title .no-link {
   font-weight: 600;
-  color: var(--text);
+  color: var(--accent);
 }
 
 .project-table td.headline {
@@ -512,7 +495,7 @@ section.projects {
 footer.site {
   border-top: 1px solid var(--border);
   padding: 1.6rem 0 2.2rem;
-  font-family: var(--font-hand);
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: 1.1rem;
   color: var(--faint);

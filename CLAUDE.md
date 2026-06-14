@@ -81,17 +81,28 @@ Rendering rules are in `schema/README.md`. In short: `site`→ **Live** pill,
 `repo`→ **Source** pill; `links[]` → arbitrary labeled pills; `implementations[]`
 → segmented pills (variant name → live, attached `</>` → source).
 
-## Theming
+## Theming (data-driven)
 
-Palettes on `:root[data-theme="light"|"dark"]` at the top of `global.css`:
+Themes and fonts are **instance data** in `themes.json` (schema:
+`schema/themes.schema.json`), not hardcoded. Shape: `{ default, defaultFont,
+themes[], fonts[] }`; each theme is `{ id, name, mode, colors{bg,surface,text,
+muted,faint,accent,error,border,shadow} }`; each font is `{ id, name, stack,
+family?, url?, weight? }` (web fonts carry `family`+`url`).
 
-- **Light = Solarized Light**, styled as a composition notebook.
-- **Dark = Dracula** on a darkened `#1e1e2e` base; project names use `var(--accent)`.
-
-Notebook-only treatments are scoped to `:root[data-theme="light"] …` and must
-stay light-only (paper grain on `body` + `header.site` — same inline-SVG URI in
-both; ruled table via `--rule`/`--margin-line`; Caveat via `--font-hand` on
-header/hero/footer only).
+- `Layout.astro` emits one `:root[data-theme="<id>"]{…}` block per theme and an
+  `@font-face` per web font, plus a flash-free init that applies the stored (or
+  default) `data-theme` and `--font-display`.
+- `global.css` holds **only structure** — no palette values, no decorations.
+  The earlier notebook treatments (paper grain, ruled table/margin, forced
+  handwriting) were **removed**; the display font is now switchable via
+  `--font-display` (applied to wordmark/nav/hero/footer). Caveat is just one
+  selectable font now.
+- The header **gear** (`components/Settings.tsx`) picks theme + font, persisting
+  to `localStorage` (`showcase-theme`, `showcase-font`).
+- `content.ts` exposes `themeSettings` with a built-in fallback so instances
+  without `themes.json` still render. Keep the TS `Theme`/`Font` types, the Go
+  model, and `schema/themes.schema.json` in agreement.
+- Project names use `var(--accent)` in every theme.
 
 ## Resizable sheet
 

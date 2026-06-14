@@ -8,3 +8,7 @@ node_modules/
 tool/bin/
 # macOS
 .DS_Store
+# Wails generated bindings + build output
+tool/gui/build/bin/
+tool/gui/frontend/wailsjs/
+tool/gui/frontend/package.json.md5
