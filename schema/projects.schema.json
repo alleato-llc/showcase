@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/nycjv321/showcase/schema/projects.schema.json",
+  "title": "Showcase projects",
+  "description": "The list of projects rendered by the showcase site. Single source of truth for an entry's shape, shared by the site (TypeScript) and the tool (Go).",
+  "type": "array",
+  "items": { "$ref": "#/definitions/project" },
+  "definitions": {
+    "link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "url"],
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri" },
+        "kind": {
+          "type": "string",
+          "enum": ["live", "source"],
+          "description": "Styling only: 'live' is accented, 'source' (default) is quiet."
+        }
+      }
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label"],
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "site": { "type": "string", "format": "uri" },
+        "repo": { "type": "string", "format": "uri" }
+      }
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "emoji", "headline"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "emoji": { "type": "string", "minLength": 1, "description": "A single emoji." },
+        "headline": { "type": "string", "minLength": 1, "description": "One-line description." },
+        "site": { "type": "string", "format": "uri", "description": "Live site / 'in action' URL → Live pill." },
+        "repo": { "type": "string", "format": "uri", "description": "Source repository URL → Source pill." },
+        "links": {
+          "type": "array",
+          "description": "Arbitrary labeled links, for several live destinations.",
+          "items": { "$ref": "#/definitions/link" }
+        },
+        "implementations": {
+          "type": "array",
+          "description": "Variants (e.g. same tool in multiple languages); each renders a segmented pill.",
+          "items": { "$ref": "#/definitions/implementation" }
+        }
+      }
+    }
+  }
+}

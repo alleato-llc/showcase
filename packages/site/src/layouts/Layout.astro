@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import ThemeToggle from "../components/ThemeToggle.tsx";
+import { config } from "../lib/content";
 
 interface Props {
   title: string;
@@ -9,6 +10,7 @@ interface Props {
 
 const { title, description } = Astro.props;
 const year = new Date().getFullYear();
+const copyright = config.copyright ?? config.name;
 ---
 
 <!doctype html>
@@ -47,10 +49,9 @@ const year = new Date().getFullYear();
   <body>
     <header class="site">
       <div class="wrap">
-        <a class="wordmark" href="/">Javier L. Velasquez</a>
+        <a class="wordmark" href="/">{config.name}</a>
         <nav>
-          <a href="https://blog.javierlvelasquez.com">Blog</a>
-          <a href="https://github.com/nycjv321">GitHub</a>
+          {(config.nav ?? []).map((link) => <a href={link.href}>{link.label}</a>)}
         </nav>
         <ThemeToggle client:load />
       </div>
@@ -62,9 +63,9 @@ const year = new Date().getFullYear();
 
     <footer class="site">
       <div class="wrap">
-        <span>Personal projects &amp; experiments.</span>
-        <span class="copyright">© {year} Javier L. Velasquez</span>
-        <span>Built with Astro.</span>
+        <span>{config.footer?.left}</span>
+        <span class="copyright">© {year} {copyright}</span>
+        <span>{config.footer?.right}</span>
       </div>
     </footer>
   </body>

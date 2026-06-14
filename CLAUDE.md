@@ -1,106 +1,103 @@
 # CLAUDE.md
 
-Guidance for working in this repo. It's a small static **Astro 5 + Preact**
-site: a single themeable table of personal projects. See `README.md` for the
-human-facing overview and `src/data/README.md` for the data model.
+Guidance for working in this repo. It's a **portfolio/showcase engine**: an
+npm-workspaces monorepo with an Astro static-site generator (`packages/site`)
+plus a forthcoming Go tool (`tool/`) to edit entries. Actual portfolios are
+**separate instance repos** that supply `projects.json` + `config.json`; this
+repo is the template/skeleton/tool. See `README.md` for the overview and
+`schema/README.md` for the data model.
 
-## Commands
+Architecture mirrors `../recommended-books` (engine monorepo + data instance).
+
+## Commands (run from the repo root)
 
 ```bash
-npm run dev      # dev server (default :4321; picks the next free port if taken)
-npm run build    # static build → dist/  (also the typecheck-ish gate; run after changes)
-npm run preview  # serve dist/
+npm install      # workspaces install
+npm run dev      # @showcase/site dev server, example data (:4321, next free port)
+npm run build    # static build → packages/site/dist  (also the typecheck-ish gate)
+npm run preview  # serve the build
+# build against an instance's data:
+SHOWCASE_DATA=../javier-showcase npm run build
 ```
 
-There are no tests. Verify changes by building and, when it's visual, by
-rendering a screenshot (see "Visual verification").
+No tests. Verify by building and, when visual, by screenshot (see "Visual
+verification").
 
-## Architecture
+## Layout
 
-- **`src/data/projects.json`** is the single source of truth for the table.
-  Treat it as data, not code — most "add/change a project" requests are edits
-  here only.
-- **`src/pages/index.astro`** renders the table from that JSON and contains the
-  inline resize script. The link-rendering helpers live in the frontmatter:
-  - `topLinks(p)` → pills from `site` / `repo` / `links[]`
-  - per-`implementation` segmented pills are built inline in the template
-- **`src/layouts/Layout.astro`** holds `<head>`, the sticky header, the footer
-  (with the build-time copyright year), and the pre-paint theme bootstrap
-  script (reads `localStorage["showcase-theme"]`, else system preference).
-- **`src/styles/global.css`** is all styling: the two palettes plus every rule.
-- **`src/components/ThemeToggle.tsx`** is the only hydrated island (`client:load`).
+```
+packages/site/     # Astro site (the skeleton/generator)
+  src/lib/content.ts   # loads projects.json + config.json from $SHOWCASE_DATA
+  src/pages/index.astro   # table + resize script; link-render helpers in frontmatter
+  src/layouts/Layout.astro  # head, header, footer — driven by config
+  src/styles/global.css     # palettes + all styling
+  src/components/ThemeToggle.tsx  # the one hydrated island (client:load)
+  public/fonts/caveat.woff2 # self-hosted handwriting font (preloaded)
+schema/
+  projects.schema.json # the contract for an entry; keep site types + Go model in sync with it
+  README.md            # data-model docs
+examples/default/      # sample instance: projects.json + config.json
+tool/                  # Go module: shared core + cobra CLI + Wails GUI (in progress)
+```
+
+## Data flow (engine ↔ instance)
+
+- The site is **data-driven**: `src/lib/content.ts` reads `projects.json` and
+  `config.json` from `process.env.SHOWCASE_DATA` (default `examples/default`,
+  resolved from the site package's cwd). Templates import `projects` and
+  `config` from there — do **not** hardcode branding/data in `.astro` files.
+- `config.json` holds branding: `name`, `title`, `description`, `heading`,
+  `tagline`, `intro`, `nav[]`, `footer{left,right}`, `copyright`.
+- `projects.json` is the project list. Its shape is defined by
+  `schema/projects.schema.json` — that schema is the single source of truth;
+  the TS interfaces in `content.ts` and the Go model must match it.
 
 ## Data / link model
 
 A project is `{ title, emoji, headline, site?, repo?, links?, implementations? }`.
-Rendering rules (and the rationale) are documented in `src/data/README.md` —
-read it before changing link rendering. In short:
-
-- `site`→ **Live** pill, `repo`→ **Source** pill.
-- `links: [{ label, url, kind? }]` → arbitrary labeled pills (`kind:"live"`
-  accented, `"source"` quiet/default). Use when a project has multiple live
-  destinations; give each a distinct label (pills are told apart by label).
-- `implementations: [{ label, site?, repo? }]` → one **segmented pill** per
-  variant (name → live, attached `</>` → source). For a project shipped in
-  multiple forms/languages.
+Rendering rules are in `schema/README.md`. In short: `site`→ **Live** pill,
+`repo`→ **Source** pill; `links[]` → arbitrary labeled pills; `implementations[]`
+→ segmented pills (variant name → live, attached `</>` → source).
 
 ## Theming
 
-Palettes are CSS custom properties on `:root[data-theme="light"|"dark"]` at the
-top of `global.css`:
+Palettes on `:root[data-theme="light"|"dark"]` at the top of `global.css`:
 
 - **Light = Solarized Light**, styled as a composition notebook.
-- **Dark = Catppuccin Mocha**.
+- **Dark = Dracula** on a darkened `#1e1e2e` base; project names use `var(--accent)`.
 
 Notebook-only treatments are scoped to `:root[data-theme="light"] …` and must
-stay light-only:
-
-- **Paper grain**: a procedural inline-SVG `feTurbulence` noise as a `data:`
-  URI background on `body` and `header.site` (kept in sync — same URI in both).
-- **Ruled table**: row dividers use `--rule` (blue); the emoji column's right
-  edge is the red `--margin-line`.
-- **Handwriting**: self-hosted **Caveat** (`public/fonts/caveat.woff2`,
-  variable weight, preloaded) via `--font-hand`, applied to the header,
-  hero, and footer only — body/table stay in the system font.
-
-To change a theme, edit the relevant `:root[data-theme="…"]` block. To preview
-alternative palettes, override the block in a built copy and screenshot it
-(below) rather than guessing hex values.
+stay light-only (paper grain on `body` + `header.site` — same inline-SVG URI in
+both; ruled table via `--rule`/`--margin-line`; Caveat via `--font-hand` on
+header/hero/footer only).
 
 ## Resizable sheet
 
-The table is wrapped in `.sheet`; the inline script in `index.astro` makes it
-resizable:
-
-- drag anywhere within `EDGE` px of the border → resize width, symmetric about
-  the page center; clamped to **40%–85%** of the viewport.
-- double-click the border → reset to 85%.
-- disabled below 720px viewport (the sheet already fills small screens).
-
-Note: an earlier elaborate "crumple into a paper ball on shrink" effect was
-**intentionally removed** — don't reintroduce it unless asked.
+`.sheet` wraps the table; the inline script in `index.astro` makes it resizable
+by dragging within `EDGE` px of the border (40%–85% of the viewport), with
+double-click-border to reset to 85%. Disabled below 720px. An earlier
+"crumple into a paper ball" effect was **intentionally removed** — don't
+reintroduce it.
 
 ## Conventions & gotchas
 
-- **Flat-file build**: `astro.config.mjs` sets `build: { format: "file" }` so
-  URLs resolve on hosts that append `.html`. Don't switch to directory format.
-- **`@property` inheritance**: if you add a registered custom property that a
-  `::before`/`::after` must read, it needs `inherits: true` (a pseudo-element
-  inherits from its host) — a subtle past bug.
-- **Self-hosted font, no CDN**: keep fonts local under `public/fonts/` and
-  preloaded in `Layout.astro`.
-- Light-only effects must stay behind `:root[data-theme="light"]`; dark mode is
-  deliberately flat.
+- **Flat-file build** (`build: { format: "file" }`) so URLs resolve on hosts
+  that append `.html`. Don't switch to directory format.
+- **`@property` inheritance**: a registered custom property a `::before` must
+  read needs `inherits: true` (past bug).
+- Self-hosted fonts only, under `packages/site/public/fonts/`, preloaded.
+- Light-only effects stay behind `:root[data-theme="light"]`; dark is flat.
+- Keep `schema/projects.schema.json`, `content.ts` types, and the Go model in
+  agreement — it's the cross-language contract.
 
 ## Visual verification
 
-This environment has headless Chrome. To check a change (especially dark mode
-or a palette), build, then serve `dist/` over HTTP and screenshot — `file://`
-breaks the absolute `/_astro/…` asset paths, so use a local server:
+Headless Chrome is available. Build, then serve `packages/site/dist` over HTTP
+(not `file://` — it breaks absolute `/_astro/…` paths) and screenshot:
 
 ```bash
-(cd dist && python3 -m http.server 8799 &)
-# to force dark, inject before </body>:
+(cd packages/site/dist && python3 -m http.server 8799 &)
+# force dark by injecting before </body>:
 #   <script>document.documentElement.dataset.theme='dark'</script>
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
   --headless --disable-gpu --force-color-profile=srgb \

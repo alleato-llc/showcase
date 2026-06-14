@@ -1,8 +1,12 @@
 # Projects data
 
-`projects.json` is the single source of truth for the showcase table. Edit it
-to add, remove, or reorder projects — the homepage renders it directly, in
-array order.
+An instance's `projects.json` is the list of projects the site renders, in
+array order — edit it to add, remove, or reorder. It lives in the instance repo
+(or `examples/default/` here); the site loads it via `$SHOWCASE_DATA`.
+
+The machine-readable contract is **`projects.schema.json`** in this folder —
+the single source of truth for an entry's shape, shared by the site
+(TypeScript) and the tool (Go). This document is the human-readable companion.
 
 Each entry:
 

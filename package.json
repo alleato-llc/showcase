@@ -1,18 +1,14 @@
 {
-  "name": "showcase-site",
+  "name": "showcase",
   "private": true,
-  "type": "module",
+  "version": "0.1.0",
+  "description": "A themeable static portfolio/showcase engine: an Astro site generator plus a Go tool (CLI + Wails GUI) to edit project entries.",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
-  },
-  "dependencies": {
-    "@astrojs/preact": "^4.0.0",
-    "astro": "^5.0.0",
-    "preact": "^10.25.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.6.0"
+    "dev": "npm run dev -w @showcase/site",
+    "build": "npm run build -w @showcase/site",
+    "preview": "npm run preview -w @showcase/site"
   }
 }

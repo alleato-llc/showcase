@@ -1,0 +1,17 @@
+{
+  "name": "Javier L. Velasquez",
+  "title": "Javier L. Velasquez — Projects",
+  "description": "A showcase of personal projects, apps, and experiments.",
+  "heading": "Projects",
+  "tagline": "Things I've built.",
+  "intro": "A running list of personal apps, tools, and experiments. Each links to its live site where one exists, otherwise its source.",
+  "nav": [
+    { "label": "Blog", "href": "https://blog.javierlvelasquez.com" },
+    { "label": "GitHub", "href": "https://github.com/nycjv321" }
+  ],
+  "footer": {
+    "left": "Personal projects & experiments.",
+    "right": "Built with Astro."
+  },
+  "copyright": "Javier L. Velasquez"
+}

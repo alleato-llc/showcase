@@ -1,40 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import projects from "../data/projects.json";
-
-// An explicit link with its own label. This is the general form: a project
-// with more than one live destination (landing page + demo, web + App Store,
-// docs…) lists them here. `kind` only sets the styling — "live" is accented,
-// "source" is quiet (the default) — so any number of live links is fine; they
-// stay distinct because each carries its own descriptive label.
-interface LinkSpec {
-  label: string;
-  url: string;
-  kind?: "live" | "source";
-}
-
-// One implementation of a project — e.g. the same tool in a different
-// language, or an app vs. the library behind it. Each carries its own links
-// and a short label that names the variant.
-interface Implementation {
-  label: string;
-  site?: string;
-  repo?: string;
-}
-
-interface Project {
-  title: string;
-  emoji: string;
-  headline: string;
-  // `site`/`repo` are shorthand for the common single-destination case;
-  // `links` is the general form for several labeled destinations; and
-  // `implementations` is for a project shipped in multiple forms. Any
-  // combination composes.
-  site?: string;
-  repo?: string;
-  links?: LinkSpec[];
-  implementations?: Implementation[];
-}
+import { projects, config } from "../lib/content";
+import type { Project } from "../lib/content";
 
 interface Pill {
   label: string;
@@ -64,18 +31,12 @@ const hasAnyLink = (p: Project): boolean =>
   topLinks(p).length > 0 || (p.implementations?.length ?? 0) > 0;
 ---
 
-<Layout
-  title="Javier L. Velasquez — Projects"
-  description="A showcase of personal projects, apps, and experiments."
->
+<Layout title={config.title} description={config.description}>
   <div class="wrap">
     <section class="hero">
-      <h1>Projects</h1>
-      <p class="tag">Things I've built.</p>
-      <p class="sub">
-        A running list of personal apps, tools, and experiments. Each links to
-        its live site where one exists, otherwise its source.
-      </p>
+      <h1>{config.heading ?? "Projects"}</h1>
+      {config.tagline && <p class="tag">{config.tagline}</p>}
+      {config.intro && <p class="sub">{config.intro}</p>}
     </section>
 
     <section class="projects">

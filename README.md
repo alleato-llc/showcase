@@ -1,94 +1,74 @@
 # Showcase
 
-A small static site that lists my personal projects in a single, themeable
-table — each row an emoji, title, one-line description, and links (live site
-and/or source). Built with [Astro](https://astro.build) + Preact.
+A themeable static **portfolio/showcase engine**: an Astro site generator plus
+a tool to edit project entries. Your actual portfolio lives in a separate
+**instance** repo that supplies the data and config; this repo is the
+template + skeleton + tool.
 
-The look is borrowed from (and pairs with) the [Soroban](https://soroban.alleato.dev)
-site: a **Solarized Light** "composition-notebook" light theme and a
-**Catppuccin Mocha** dark theme, switchable and system-aware.
+Modeled on the same engine/instance split as
+[recommended-books](https://github.com/nycjv321/recommended-books): the engine
+is a workspaces monorepo, the content is a thin sibling repo.
 
-## Stack
+## Layout
 
-- **Astro 5** — static output, flat-file build (`about.html`, not `about/index.html`)
-- **Preact** — one interactive island, the theme toggle
-- **TypeScript**
-- No CSS framework; one hand-written `global.css`
+```
+packages/
+  site/                 # Astro static-site generator (the skeleton)
+schema/
+  projects.schema.json  # the contract: an entry's shape (shared by site + tool)
+  README.md             # data-model docs
+examples/
+  default/              # a sample instance — projects.json + config.json
+tool/                   # Go module: CLI + Wails GUI editor   (coming next)
+```
 
-## Getting started
+A live portfolio is an **instance** — its own repo holding just:
+
+```
+projects.json   # your entries  (validated against schema/projects.schema.json)
+config.json     # name, nav, hero copy, footer, etc.
+```
+
+## How the site finds its data
+
+`packages/site` reads `projects.json` + `config.json` from the directory in the
+`SHOWCASE_DATA` env var, falling back to `examples/default` so the engine runs
+out of the box.
 
 ```bash
-npm install
-npm run dev      # local dev server (default http://localhost:4321)
-npm run build    # static build → dist/
-npm run preview  # serve the built dist/ locally
+npm install                                   # workspaces install
+npm run dev                                    # engine + example data
+npm run build                                  # → packages/site/dist
+SHOWCASE_DATA=../javier-showcase npm run build # build an instance's data
 ```
 
-## Adding or editing projects
+## Editing entries
 
-Everything on the page comes from **`src/data/projects.json`** — edit that one
-file to add, remove, or reorder projects. The page renders the array in order.
+Today: edit `projects.json` directly (see **[`schema/README.md`](schema/README.md)**
+for the field reference and link model — `site`/`repo`, `links[]`, and
+`implementations[]`).
 
-A minimal entry:
-
-```json
-{
-  "title": "Soroban",
-  "emoji": "🧮",
-  "headline": "An exact calculator with a spreadsheet attached.",
-  "site": "https://soroban.alleato.dev",
-  "repo": "https://github.com/alleato-llc/soroban"
-}
-```
-
-The links column adapts to whatever a project has:
-
-- `site` / `repo` → a **Live** pill and/or a **Source** pill (a row with
-  neither shows a dash).
-- `links: [{ label, url, kind }]` → arbitrary labeled links, for projects with
-  several live destinations (e.g. a demo *and* docs). `kind: "live"` is
-  accented, `"source"` (default) is quiet.
-- `implementations: [{ label, site?, repo? }]` → for a project shipped in
-  several forms (e.g. the same tool in two languages). Each renders a
-  **segmented pill**: the variant name links to its live site, an attached
-  `</>` segment links to its source.
-
-Full field reference and more examples: **[`src/data/README.md`](src/data/README.md)**.
+Coming: a **Go tool** (`tool/`) — one shared core exposed as both a **CLI** and
+a **Wails desktop GUI** — to add/edit/reorder/validate entries against
+`schema/projects.schema.json`, with an emoji picker and live preview in the GUI.
 
 ## Theming
 
-Two palettes, driven by a `data-theme` attribute on `<html>` resolved before
-first paint (stored choice wins, else the system preference):
+Two palettes via a `data-theme` attribute (resolved before first paint; stored
+choice wins, else system):
 
-- **Light — Solarized Light**, dressed as a composition notebook: warm paper
-  background with a faint procedural paper grain, the table ruled with blue
-  lines and a red margin rule, and Caveat handwriting on the header, hero, and
-  footer. The notebook treatments are **light-theme only**.
-- **Dark — Catppuccin Mocha**: cozy `#1e1e2e` base with a soft pink accent.
+- **Light — Solarized Light**, styled as a composition notebook (paper grain,
+  ruled table + red margin rule, Caveat handwriting on header/hero/footer).
+  Notebook treatments are light-theme only.
+- **Dark — Dracula** on a darkened `#1e1e2e` base; project names take the
+  accent pink.
 
-All colors are CSS custom properties at the top of `src/styles/global.css`;
-swapping a palette is editing one `:root[data-theme="…"]` block.
-
-The projects table is a resizable "sheet": drag anywhere on its border to
-resize it (40%–85% of the page), or double-click the border to reset to 85%.
-
-## Project structure
-
-```
-src/
-  pages/index.astro       # the page + the resize script
-  layouts/Layout.astro    # <head>, header, footer, theme bootstrap
-  components/ThemeToggle.tsx
-  styles/global.css       # palettes + all styling
-  data/projects.json      # ← the project list (source of truth)
-  data/README.md          # data-model docs
-public/
-  fonts/caveat.woff2      # self-hosted handwriting font
-  favicon.svg
-```
+All colors are CSS custom properties at the top of
+`packages/site/src/styles/global.css`. The projects table is a resizable
+"sheet" (drag the border, 40%–85%; double-click to reset to 85%).
 
 ## Deployment
 
-`npm run build` emits a fully static `dist/`. The flat-file build format
-(`build: { format: "file" }` in `astro.config.mjs`) is chosen so extensionless
-URLs resolve on hosts that append `.html`. Deploy `dist/` to any static host.
+`npm run build` emits a static `packages/site/dist`. The flat-file build format
+(`build: { format: "file" }`) makes extensionless URLs resolve on hosts that
+append `.html`. Point `SHOWCASE_DATA` at an instance to build that portfolio.
