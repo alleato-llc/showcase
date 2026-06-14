@@ -57,3 +57,19 @@ func (a *App) Validate(projects []model.Project) []string {
 	}
 	return out
 }
+
+// LoadThemes loads the instance's themes.json.
+func (a *App) LoadThemes() (model.ThemeSettings, error) { return store.LoadThemes(a.dataDir) }
+
+// SaveThemes writes themes.json back (atomic).
+func (a *App) SaveThemes(s model.ThemeSettings) error { return store.SaveThemes(a.dataDir, s) }
+
+// ValidateThemes returns human-readable problems (empty == valid).
+func (a *App) ValidateThemes(s model.ThemeSettings) []string {
+	errs := s.Validate()
+	out := make([]string, 0, len(errs))
+	for _, e := range errs {
+		out = append(out, e.Error())
+	}
+	return out
+}

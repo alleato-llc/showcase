@@ -34,16 +34,21 @@ func Load(dataDir string) ([]model.Project, error) {
 
 // Save writes projects.json atomically.
 func Save(dataDir string, projects []model.Project) error {
+	return writeJSON(ProjectsPath(dataDir), projects)
+}
+
+// writeJSON encodes v as 2-space JSON (no HTML escaping, trailing newline) and
+// writes it atomically via a temp file + rename.
+func writeJSON(path string, v any) error {
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
 	enc.SetEscapeHTML(false)
 	enc.SetIndent("", "  ")
-	if err := enc.Encode(projects); err != nil { // Encode adds the trailing newline
+	if err := enc.Encode(v); err != nil { // Encode adds the trailing newline
 		return err
 	}
 
-	path := ProjectsPath(dataDir)
-	tmp, err := os.CreateTemp(filepath.Dir(path), ".projects-*.json")
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".tmp-*.json")
 	if err != nil {
 		return err
 	}
