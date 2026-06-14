@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Showcase — a themeable portfolio engine</title>
+    <meta
+      name="description"
+      content="A themeable static portfolio engine: an Astro site generator plus a Go CLI and Wails desktop GUI to edit your projects. Your data lives in a tiny instance repo."
+    />
+    <meta property="og:title" content="Showcase — a themeable portfolio engine" />
+    <meta
+      property="og:description"
+      content="Astro site generator + Go CLI/Wails GUI. Your projects in one editable table; swap themes and fonts from a gear."
+    />
+    <style>
+      :root {
+        --bg: #1e1e2e;
+        --surface: #2a2a3a;
+        --text: #f5f5fa;
+        --muted: #b9b3d0;
+        --faint: #7f849c;
+        --accent: #ff79c6;
+        --accent-2: #bd93f9;
+        --border: rgba(248, 248, 242, 0.1);
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(1200px 600px at 50% -10%, color-mix(in srgb, var(--accent-2) 14%, transparent), transparent 70%),
+          var(--bg);
+        color: var(--text);
+        font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .wrap { max-width: 980px; margin: 0 auto; padding: 0 1.25rem; }
+      header {
+        display: flex; align-items: center; gap: 1rem;
+        height: 3.5rem; border-bottom: 1px solid var(--border);
+      }
+      .mark { font-weight: 700; letter-spacing: 0.01em; }
+      .mark span { color: var(--accent); }
+      header nav { margin-left: auto; display: flex; gap: 1.2rem; font-size: 0.95rem; }
+      header nav a { color: var(--muted); }
+
+      .hero { text-align: center; padding: 5rem 0 3rem; }
+      .hero h1 {
+        font-size: clamp(2.4rem, 6vw, 3.6rem); margin: 0 0 0.8rem; letter-spacing: -0.02em;
+      }
+      .hero h1 .grad {
+        background: linear-gradient(100deg, var(--accent), var(--accent-2));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      .hero p { font-size: 1.2rem; color: var(--muted); max-width: 40em; margin: 0 auto 2rem; }
+      .cta { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+      .btn {
+        display: inline-block; padding: 0.7rem 1.3rem; border-radius: 10px;
+        font-weight: 600; border: 1px solid var(--border); font-size: 0.98rem;
+      }
+      .btn.primary { background: var(--accent); color: var(--bg); border-color: transparent; }
+      .btn.primary:hover { text-decoration: none; filter: brightness(1.08); }
+      .btn.quiet { background: var(--surface); color: var(--text); }
+      .btn.quiet:hover { text-decoration: none; border-color: var(--faint); }
+
+      section { padding: 3rem 0; }
+      h2 { font-size: 1.5rem; margin: 0 0 1.6rem; letter-spacing: -0.01em; }
+      .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+      .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.3rem; }
+      .card h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+      .card h3 .ic { color: var(--accent); margin-right: 0.4rem; }
+      .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+      code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.88em;
+        background: color-mix(in srgb, var(--faint) 18%, transparent); padding: 0.1em 0.4em; border-radius: 5px;
+      }
+      .how { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.5rem; }
+      .how ol { margin: 0; padding-left: 1.2rem; color: var(--muted); }
+      .how li { margin: 0.4rem 0; }
+      .how strong { color: var(--text); }
+      footer { border-top: 1px solid var(--border); padding: 1.8rem 0 2.4rem; color: var(--faint); font-size: 0.9rem; }
+      footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <span class="mark">Show<span>case</span></span>
+        <nav>
+          <a href="#features">Features</a>
+          <a href="https://demo.showcase.alleato.dev">Demo</a>
+          <a href="https://github.com/alleato-llc/showcase">GitHub</a>
+        </nav>
+      </header>
+
+      <section class="hero">
+        <h1>A themeable <span class="grad">portfolio engine</span></h1>
+        <p>
+          List your projects in one clean, resizable table — each with an emoji,
+          a headline, and links. Swap themes and fonts from a gear. Edit entries
+          from a CLI or a desktop app. Your content lives in a tiny instance
+          repo; this engine renders it.
+        </p>
+        <div class="cta">
+          <a class="btn primary" href="https://demo.showcase.alleato.dev">See the live demo</a>
+          <a class="btn quiet" href="https://github.com/alleato-llc/showcase">View source</a>
+        </div>
+      </section>
+
+      <section id="features">
+        <h2>What it gives you</h2>
+        <div class="features">
+          <div class="card">
+            <h3><span class="ic">◧</span>One table, well done</h3>
+            <p>Emoji · title · headline · links. <code>Live</code>/<code>Source</code> pills, multi-link rows, and segmented pills for the same tool in several languages.</p>
+          </div>
+          <div class="card">
+            <h3><span class="ic">⚙</span>Themeable</h3>
+            <p>A gear switches color themes and fonts. Define your own palettes (and web fonts) — they're just data.</p>
+          </div>
+          <div class="card">
+            <h3><span class="ic">⌘</span>Two editors</h3>
+            <p>A Go <code>showcase</code> CLI (add/edit/reorder/validate) and a Wails desktop GUI with drag-reorder, an emoji picker, a theme editor, and live preview.</p>
+          </div>
+          <div class="card">
+            <h3><span class="ic">⧉</span>Engine + instance</h3>
+            <p>The engine is the template &amp; tool; your portfolio is a thin sibling repo of <code>projects.json</code> + <code>config.json</code> + <code>themes.json</code>.</p>
+          </div>
+          <div class="card">
+            <h3><span class="ic">↔</span>Resizable</h3>
+            <p>Drag the sheet's border to resize it (40–85%); double-click to reset. Small flourishes, no framework.</p>
+          </div>
+          <div class="card">
+            <h3><span class="ic">⚡</span>Static &amp; fast</h3>
+            <p>Astro output — plain HTML/CSS, flash-free theming, deploys to any static host (S3 + CloudFront here).</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>How it works</h2>
+        <div class="how">
+          <ol>
+            <li>Fork/scaffold an <strong>instance</strong> repo — it holds <code>projects.json</code>, <code>config.json</code>, <code>themes.json</code>.</li>
+            <li>Edit entries with the <strong>CLI</strong> or the <strong>desktop GUI</strong> (or by hand — it's validated JSON).</li>
+            <li>The <strong>engine</strong> builds your data into a static site; deploy the <code>dist/</code> anywhere.</li>
+          </ol>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <div class="wrap">
+        <span>Showcase — an open-source portfolio engine.</span>
+        <span><a href="https://github.com/alleato-llc/showcase">alleato-llc/showcase</a></span>
+      </div>
+    </footer>
+  </body>
+</html>

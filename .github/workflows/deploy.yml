@@ -1,0 +1,89 @@
+name: Deploy
+
+# Publishes two sites on push to main, mirroring Soroban's flow (OIDC → S3 →
+# CloudFront invalidate; bucket name == domain, distribution found by alias):
+#   - the landing page  → showcase.alleato.dev
+#   - the live demo      → demo.showcase.alleato.dev   (the example instance)
+#
+# This runs `aws s3 sync` + a CloudFront invalidation directly — the same two
+# operations `salpa deploy` performs — so it needs no darwin-only salpa binary.
+# Auth is short-lived OIDC (no stored keys). See INFRA.md for the AWS setup.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "landing/**"
+      - "packages/**"
+      - "examples/**"
+      - "schema/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write # assume the deploy role via OIDC
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  LANDING_DOMAIN: showcase.alleato.dev
+  DEMO_DOMAIN: demo.showcase.alleato.dev
+
+jobs:
+  deploy:
+    name: Build + deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Build the live demo (example instance)
+        run: |
+          npm ci
+          SHOWCASE_DATA="$PWD/examples/default" npm run build
+
+      # The Actions logs are public — mask the account id from the role ARN.
+      - name: Mask account id
+        env:
+          ROLE_ARN: ${{ vars.AWS_SITE_ROLE_ARN }}
+        run: |
+          echo "::add-mask::$(printf '%s' "$ROLE_ARN" | cut -d: -f5)"
+
+      - name: Configure deploy credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_SITE_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy landing page
+        run: |
+          aws s3 sync landing "s3://$LANDING_DOMAIN" --delete
+          DIST=$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?contains(Aliases.Items, '$LANDING_DOMAIN')].Id | [0]" \
+            --output text)
+          if [ -n "$DIST" ] && [ "$DIST" != "None" ]; then
+            aws cloudfront create-invalidation --distribution-id "$DIST" --paths "/*"
+          else
+            echo "::warning::no CloudFront distribution aliased to $LANDING_DOMAIN"
+          fi
+
+      - name: Deploy live demo
+        run: |
+          aws s3 sync packages/site/dist "s3://$DEMO_DOMAIN" --delete
+          DIST=$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?contains(Aliases.Items, '$DEMO_DOMAIN')].Id | [0]" \
+            --output text)
+          if [ -n "$DIST" ] && [ "$DIST" != "None" ]; then
+            aws cloudfront create-invalidation --distribution-id "$DIST" --paths "/*"
+          else
+            echo "::warning::no CloudFront distribution aliased to $DEMO_DOMAIN"
+          fi
