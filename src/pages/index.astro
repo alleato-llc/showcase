@@ -1,0 +1,167 @@
+---
+import Layout from "../layouts/Layout.astro";
+import projects from "../data/projects.json";
+
+// An explicit link with its own label. This is the general form: a project
+// with more than one live destination (landing page + demo, web + App Store,
+// docs…) lists them here. `kind` only sets the styling — "live" is accented,
+// "source" is quiet (the default) — so any number of live links is fine; they
+// stay distinct because each carries its own descriptive label.
+interface LinkSpec {
+  label: string;
+  url: string;
+  kind?: "live" | "source";
+}
+
+// One implementation of a project — e.g. the same tool in a different
+// language, or an app vs. the library behind it. Each carries its own links
+// and a short label that names the variant.
+interface Implementation {
+  label: string;
+  site?: string;
+  repo?: string;
+}
+
+interface Project {
+  title: string;
+  emoji: string;
+  headline: string;
+  // `site`/`repo` are shorthand for the common single-destination case;
+  // `links` is the general form for several labeled destinations; and
+  // `implementations` is for a project shipped in multiple forms. Any
+  // combination composes.
+  site?: string;
+  repo?: string;
+  links?: LinkSpec[];
+  implementations?: Implementation[];
+}
+
+interface Pill {
+  label: string;
+  url: string;
+  kind: "live" | "source";
+}
+
+const isTodo = (s: string) => s === "❓" || /^todo\b/i.test(s.trim());
+
+// Top-level pills for a project's Links cell: the simple site/repo shorthand
+// plus any explicit labeled links. Implementations are NOT folded in here —
+// they render as their own labeled groups (see implLinks).
+const topLinks = (p: Project): Pill[] => {
+  const pills: Pill[] = [];
+  const push = (label: string, url: string | undefined, kind: Pill["kind"]) => {
+    const u = url?.trim();
+    if (u) pills.push({ label, url: u, kind });
+  };
+
+  push("Live", p.site, "live");
+  push("Source", p.repo, "source");
+  for (const l of p.links ?? []) push(l.label, l.url, l.kind ?? "source");
+  return pills;
+};
+
+const hasAnyLink = (p: Project): boolean =>
+  topLinks(p).length > 0 || (p.implementations?.length ?? 0) > 0;
+---
+
+<Layout
+  title="Javier L. Velasquez — Projects"
+  description="A showcase of personal projects, apps, and experiments."
+>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Projects</h1>
+      <p class="tag">Things I've built.</p>
+      <p class="sub">
+        A running list of personal apps, tools, and experiments. Each links to
+        its live site where one exists, otherwise its source.
+      </p>
+    </section>
+
+    <section class="projects">
+      <table class="project-table">
+        <thead>
+          <tr>
+            <th aria-label="Emoji"></th>
+            <th>Project</th>
+            <th>What it is</th>
+            <th>Links</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            (projects as Project[]).map((p) => (
+              <tr>
+                <td class:list={["emoji", { todo: isTodo(p.emoji) }]}>
+                  {p.emoji}
+                </td>
+                <td class="title">
+                  <span class="no-link">{p.title}</span>
+                </td>
+                <td class:list={["headline", { todo: isTodo(p.headline) }]}>
+                  {p.headline}
+                </td>
+                <td class="links">
+                  {!hasAnyLink(p) && <span class="links-none">—</span>}
+                  {topLinks(p).map((l) => (
+                    <a
+                      class:list={["pill", l.kind]}
+                      href={l.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {l.label}
+                    </a>
+                  ))}
+                  {(p.implementations ?? []).map((impl) => {
+                    const live = impl.site?.trim();
+                    const repo = impl.repo?.trim();
+                    return (
+                      <span class="seg-pill">
+                        {live && (
+                          <a
+                            class="seg live"
+                            href={live}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {impl.label}
+                          </a>
+                        )}
+                        {repo && (
+                          <a
+                            class="seg source"
+                            href={repo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`${impl.label} source`}
+                            title={`${impl.label} source`}
+                          >
+                            {live ? (
+                              <svg class="seg-ic" viewBox="0 0 16 16" aria-hidden="true">
+                                <path
+                                  d="M5.5 4 2 8l3.5 4M10.5 4 14 8l-3.5 4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="1.6"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                              </svg>
+                            ) : (
+                              impl.label
+                            )}
+                          </a>
+                        )}
+                      </span>
+                    );
+                  })}
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </section>
+  </div>
+</Layout>

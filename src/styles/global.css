@@ -1,0 +1,419 @@
+/* Palette lifted verbatim from the Soroban site (App/Resources/Themes/
+   solarized-light.json / dracula.json) so this showcase wears the same two
+   themes. `data-theme` is set before first paint by the inline script in
+   Layout.astro; with no stored choice it follows the system. */
+
+:root,
+:root[data-theme="light"] {
+  --bg: #fdf6e3;          /* windowBackground */
+  --surface: #eee8d5;     /* inputBackground */
+  --text: #073642;        /* resultText */
+  --muted: #657b83;       /* expressionText */
+  --faint: #93a1a1;       /* secondaryText */
+  --accent: #268bd2;      /* accent */
+  --error: #dc322f;       /* errorText */
+  --border: rgba(7, 54, 66, 0.12);
+  --shadow: rgba(7, 54, 66, 0.06);
+}
+
+:root[data-theme="dark"] {
+  --bg: #282a36;          /* windowBackground */
+  --surface: #343746;     /* inputBackground */
+  --text: #f8f8f2;        /* resultText */
+  --muted: #bd93f9;       /* expressionText */
+  --faint: #6272a4;       /* secondaryText */
+  --accent: #ff79c6;      /* accent */
+  --error: #ff5555;       /* errorText */
+  --border: rgba(248, 248, 242, 0.1);
+  --shadow: rgba(0, 0, 0, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.2s ease, color 0.2s ease;
+  overflow-x: clip;
+}
+
+code,
+pre,
+.mono {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.92em;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* ---------- header ---------- */
+
+header.site {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+header.site .wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  height: 3.25rem;
+}
+
+.wordmark {
+  font-weight: 650;
+  color: var(--text);
+  letter-spacing: 0.01em;
+}
+
+.wordmark:hover {
+  text-decoration: none;
+}
+
+header.site nav {
+  display: flex;
+  gap: 1.1rem;
+  margin-left: auto;
+  font-size: 0.92rem;
+}
+
+header.site nav a {
+  color: var(--muted);
+}
+
+.theme-toggle {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 8px;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.theme-toggle:hover {
+  color: var(--text);
+}
+
+@media (max-width: 600px) {
+  header.site .wrap {
+    flex-wrap: wrap;
+    height: auto;
+    gap: 0.5rem;
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .wordmark {
+    white-space: nowrap;
+  }
+
+  .theme-toggle {
+    margin-left: auto;
+  }
+
+  header.site nav {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.1rem;
+  }
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  padding: 4rem 0 2.5rem;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: clamp(2.1rem, 5vw, 3rem);
+  margin: 0 0 0.6rem;
+  letter-spacing: -0.015em;
+}
+
+.hero p.tag {
+  font-size: 1.2rem;
+  color: var(--muted);
+  margin: 0 auto 1rem;
+  max-width: 34em;
+}
+
+.hero p.sub {
+  color: var(--faint);
+  max-width: 40em;
+  margin: 0 auto;
+}
+
+/* ---------- projects table ---------- */
+
+section.projects {
+  padding: 1rem 0 4rem;
+}
+
+.project-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px var(--shadow);
+}
+
+.project-table thead th {
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--faint);
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--faint) 7%, transparent);
+}
+
+.project-table tbody td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.project-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.project-table tbody tr {
+  transition: background 0.12s ease;
+}
+
+.project-table tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+/* emoji cell: fixed, centered, a touch larger */
+.project-table td.emoji {
+  width: 2.5rem;
+  text-align: center;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+/* title cell: the app name (links now live in their own column) */
+.project-table td.title {
+  white-space: nowrap;
+}
+
+.project-table td.title .no-link {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.project-table td.headline {
+  color: var(--muted);
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+/* links cell: top-level pills, plus a labeled group per implementation */
+.project-table td.links {
+  white-space: nowrap;
+}
+
+.project-table .links-none {
+  color: var(--faint);
+  opacity: 0.6;
+}
+
+/* segmented pill: one connected pill per implementation — the variant name
+   links to its live site, an attached "</>" segment links to its source. A
+   variant with only one link is just a single segment. */
+.seg-pill {
+  display: inline-flex;
+  align-items: stretch;
+  vertical-align: middle;
+  margin-right: 0.4rem;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+  font-weight: 550;
+  line-height: 1;
+}
+
+.seg-pill:last-child {
+  margin-right: 0;
+}
+
+.seg {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.34rem 0.62rem;
+}
+
+.seg:hover {
+  text-decoration: none;
+}
+
+/* a hairline divider between the two segments */
+.seg + .seg {
+  border-left: 1px solid var(--border);
+}
+
+.seg.live {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.seg.live::after {
+  content: " ↗";
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+.seg.live:hover {
+  filter: brightness(1.08);
+}
+
+.seg.source {
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.seg.source:hover {
+  color: var(--text);
+}
+
+.seg-ic {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
+}
+
+.pill {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 550;
+  line-height: 1;
+  padding: 0.32rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  margin-right: 0.4rem;
+}
+
+.pill:last-child {
+  margin-right: 0;
+}
+
+.pill::after {
+  content: " ↗";
+  font-size: 0.85em;
+  opacity: 0.6;
+}
+
+/* the live/"in action" link leads with the accent; source stays quiet */
+.pill.live {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: transparent;
+}
+
+.pill.live:hover {
+  text-decoration: none;
+  filter: brightness(1.08);
+}
+
+.pill.source {
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.pill.source:hover {
+  text-decoration: none;
+  color: var(--text);
+  border-color: var(--faint);
+}
+
+/* placeholder styling so unfilled rows read as TODO, not content */
+.project-table .todo {
+  color: var(--faint);
+  font-style: italic;
+  opacity: 0.7;
+}
+
+@media (max-width: 560px) {
+  .project-table thead {
+    display: none;
+  }
+
+  .project-table,
+  .project-table tbody,
+  .project-table tr,
+  .project-table td {
+    display: block;
+    width: auto;
+  }
+
+  .project-table tbody tr {
+    padding: 0.6rem 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .project-table tbody td {
+    border: none;
+    padding: 0.15rem 0.6rem;
+  }
+
+  .project-table td.emoji {
+    text-align: left;
+  }
+}
+
+/* ---------- footer ---------- */
+
+footer.site {
+  border-top: 1px solid var(--border);
+  padding: 1.6rem 0 2.2rem;
+  font-size: 0.85rem;
+  color: var(--faint);
+  display: flow-root;
+}
+
+footer.site .wrap {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
