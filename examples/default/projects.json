@@ -17,84 +17,72 @@
     "title": "PickleKit",
     "emoji": "🥒",
     "headline": "A standalone Swift Cucumber/BDD framework for running Gherkin feature files.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/pickle-kit"
   },
   {
     "title": "Kumi",
     "emoji": "🧵",
     "headline": "A tiny, dependency-free HTML builder for Swift.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/kumi"
   },
   {
     "title": "lorem-ipsum",
     "emoji": "📝",
     "headline": "A Markov-chain lorem ipsum generator with three front ends over one Rust core.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/lorem-ipsum"
   },
   {
     "title": "dnsctl",
     "emoji": "🌐",
     "headline": "Switch between DNS server profiles on macOS via TUI, CLI, or desktop app.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/dnsctl"
   },
   {
     "title": "Spring Boot Reference",
     "emoji": "🍃",
     "headline": "A reference project codifying best practices for Java/Spring Boot applications.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/spring-boot-reference"
   },
   {
     "title": "Babushka",
     "emoji": "🪆",
     "headline": "A native macOS app for inspecting and editing MKV (Matroska) files.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/babushka"
   },
   {
     "title": "prexp",
     "emoji": "🔍",
     "headline": "A terminal process explorer for open file descriptors, CPU, and memory usage.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/prexp"
   },
   {
     "title": "Tint",
     "emoji": "🎨",
     "headline": "A ratatui-inspired immediate-mode TUI framework for Swift.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/tint"
   },
   {
     "title": "@alleato/shell",
     "emoji": "🐚",
     "headline": "A terminal shell engine with xterm.js integration for web-based terminals.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/shell.js"
   },
   {
     "title": "Rsync Studio",
     "emoji": "🔄",
     "headline": "A cross-platform desktop and terminal app for managing rsync backup jobs.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/rsync-studio"
   },
   {
     "title": "vtree",
     "emoji": "🌳",
     "headline": "A colorized TUI directory tree viewer with file sizes and counts.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/vtree"
   },
   {
     "title": "aux",
     "emoji": "🎵",
     "headline": "A terminal music player with real-time audio visualizations.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/aux"
   },
   {
@@ -102,15 +90,20 @@
     "emoji": "🎚️",
     "headline": "A dynamic range meter for audio files, implementing the TT DR standard — in two languages.",
     "implementations": [
-      { "label": "Rust", "repo": "https://github.com/alleato-llc/dr" },
-      { "label": "Swift", "repo": "https://github.com/alleato-llc/dr-kit" }
+      {
+        "label": "Rust",
+        "repo": "https://github.com/alleato-llc/dr"
+      },
+      {
+        "label": "Swift",
+        "repo": "https://github.com/alleato-llc/dr-kit"
+      }
     ]
   },
   {
     "title": "Emoji Database",
     "emoji": "😀",
     "headline": "Search and copy emojis to your clipboard, as a desktop or web app.",
-    "site": "",
     "repo": "https://github.com/alleato-llc/emoji-database"
   }
 ]

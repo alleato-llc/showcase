@@ -4,5 +4,7 @@ dist/
 .astro/
 # dependencies
 node_modules/
+# Go tool build output
+tool/bin/
 # macOS
 .DS_Store
