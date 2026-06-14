@@ -8,6 +8,7 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+const year = new Date().getFullYear();
 ---
 
 <!doctype html>
@@ -20,6 +21,13 @@ const { title, description } = Astro.props;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="preload"
+      href="/fonts/caveat.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <script is:inline>
       // Resolve the theme BEFORE first paint: stored choice wins, otherwise
       // follow the system — and keep following it live until the user picks.
@@ -55,6 +63,7 @@ const { title, description } = Astro.props;
     <footer class="site">
       <div class="wrap">
         <span>Personal projects &amp; experiments.</span>
+        <span class="copyright">© {year} Javier L. Velasquez</span>
         <span>Built with Astro.</span>
       </div>
     </footer>

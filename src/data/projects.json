@@ -10,7 +10,7 @@
     "title": "Recommended Books",
     "emoji": "📚",
     "headline": "A static site generator and Electron admin app for showcasing book recommendations.",
-    "site": "",
+    "site": "https://books.javierlvelasquez.com",
     "repo": "https://github.com/nycjv321/recommended-books"
   },
   {

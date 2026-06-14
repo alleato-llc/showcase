@@ -79,7 +79,8 @@ const hasAnyLink = (p: Project): boolean =>
     </section>
 
     <section class="projects">
-      <table class="project-table">
+      <div class="sheet">
+        <table class="project-table">
         <thead>
           <tr>
             <th aria-label="Emoji"></th>
@@ -161,7 +162,82 @@ const hasAnyLink = (p: Project): boolean =>
             ))
           }
         </tbody>
-      </table>
+        </table>
+      </div>
     </section>
   </div>
+
+  <script>
+    // Make the notebook sheet resizable by dragging anywhere on its border:
+    //  • drag a border edge → resize width, symmetric about the page center
+    //  • double-click border → reset to 85% of the page width
+    // Enabled only on wider viewports; on phones the sheet already fills the page.
+    const sheet = document.querySelector<HTMLElement>(".sheet");
+    if (sheet && matchMedia("(min-width: 720px)").matches) {
+      const EDGE = 16; // px from any border that begins a resize
+
+      const vw = () => document.documentElement.clientWidth;
+      const maxWidth = () => Math.round(vw() * 0.85); // largest: 85% of page
+      const minWidth = () => Math.round(vw() * 0.4); // smallest: 40% of page
+      const clamp = (w: number) =>
+        Math.max(minWidth(), Math.min(w, maxWidth()));
+      const setWidth = (w: number) => {
+        sheet.style.width = clamp(w) + "px";
+      };
+
+      let dragging = false;
+      let centerX = 0;
+
+      const onBorder = (e: PointerEvent | MouseEvent) => {
+        const r = sheet.getBoundingClientRect();
+        const { clientX: x, clientY: y } = e;
+        if (x < r.left || x > r.right || y < r.top || y > r.bottom) return false;
+        return (
+          x - r.left <= EDGE ||
+          r.right - x <= EDGE ||
+          y - r.top <= EDGE ||
+          r.bottom - y <= EDGE
+        );
+      };
+
+      sheet.addEventListener("pointermove", (e) => {
+        if (dragging) {
+          setWidth(2 * Math.abs(e.clientX - centerX));
+        } else {
+          sheet.style.cursor = onBorder(e) ? "ew-resize" : "";
+        }
+      });
+
+      sheet.addEventListener("pointerdown", (e) => {
+        if (!onBorder(e)) return;
+        e.preventDefault();
+        dragging = true;
+        const r = sheet.getBoundingClientRect();
+        centerX = r.left + r.width / 2;
+        sheet.classList.add("dragging");
+        sheet.setPointerCapture(e.pointerId);
+      });
+
+      const endDrag = (e: PointerEvent) => {
+        if (!dragging) return;
+        dragging = false;
+        sheet.classList.remove("dragging");
+        try {
+          sheet.releasePointerCapture(e.pointerId);
+        } catch {}
+      };
+      sheet.addEventListener("pointerup", endDrag);
+      sheet.addEventListener("pointercancel", endDrag);
+
+      // double-click a border to reset to (nearly) full page width
+      sheet.addEventListener("dblclick", (e) => {
+        if (onBorder(e)) setWidth(maxWidth());
+      });
+
+      // keep the chosen width within bounds if the window shrinks
+      addEventListener("resize", () => {
+        if (sheet.style.width) setWidth(parseFloat(sheet.style.width));
+      });
+    }
+  </script>
 </Layout>

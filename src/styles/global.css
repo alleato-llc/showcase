@@ -1,29 +1,47 @@
-/* Palette lifted verbatim from the Soroban site (App/Resources/Themes/
-   solarized-light.json / dracula.json) so this showcase wears the same two
-   themes. `data-theme` is set before first paint by the inline script in
+/* Caveat — a self-hosted handwriting font (latin subset, variable weight) for
+   the wordmark and hero headings, like a name written on a notebook cover. */
+@font-face {
+  font-family: "Caveat";
+  src: url("/fonts/caveat.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-hand: "Caveat", "Segoe Script", "Bradley Hand", cursive;
+}
+
+/* Light: Solarized Light (Ethan Schoonover). Dark: Dracula, on a darkened
+   #1e1e2e base. `data-theme` is set before first paint by the inline script in
    Layout.astro; with no stored choice it follows the system. */
 
 :root,
 :root[data-theme="light"] {
-  --bg: #fdf6e3;          /* windowBackground */
-  --surface: #eee8d5;     /* inputBackground */
-  --text: #073642;        /* resultText */
+  --bg: #fcf9ee;          /* pearl/cream notebook paper (was #fdf6e3) */
+  --surface: #ffffff;     /* cards & table sit on the paper as clean white */
+  --text: #073642;        /* resultText — ink */
   --muted: #657b83;       /* expressionText */
   --faint: #93a1a1;       /* secondaryText */
   --accent: #268bd2;      /* accent */
   --error: #dc322f;       /* errorText */
-  --border: rgba(7, 54, 66, 0.12);
-  --shadow: rgba(7, 54, 66, 0.06);
+  --border: rgba(7, 54, 66, 0.1);
+  --shadow: rgba(7, 54, 66, 0.05);
+  /* notebook ruling inside the table — blue rules between rows, a soft red
+     margin line down the emoji column. Light theme only (see the table
+     rules below). */
+  --rule: rgba(38, 139, 210, 0.2);
+  --margin-line: rgba(220, 50, 47, 0.3);
 }
 
 :root[data-theme="dark"] {
-  --bg: #282a36;          /* windowBackground */
-  --surface: #343746;     /* inputBackground */
-  --text: #f8f8f2;        /* resultText */
-  --muted: #bd93f9;       /* expressionText */
-  --faint: #6272a4;       /* secondaryText */
-  --accent: #ff79c6;      /* accent */
-  --error: #ff5555;       /* errorText */
+  --bg: #1e1e2e;          /* darkened base (classic Dracula uses #282a36) */
+  --surface: #343746;     /* Dracula inputBackground */
+  --text: #f8f8f2;        /* Dracula foreground */
+  --muted: #bd93f9;       /* Dracula purple */
+  --faint: #6272a4;       /* Dracula comment */
+  --accent: #ff79c6;      /* Dracula neon pink */
+  --error: #ff5555;       /* Dracula red */
   --border: rgba(248, 248, 242, 0.1);
   --shadow: rgba(0, 0, 0, 0.3);
 }
@@ -37,6 +55,15 @@ html {
   overflow-x: clip;
 }
 
+/* Paper grain, light theme only: a faint procedural noise (inline SVG
+   turbulence, no asset) over the warm paper tone, so the page reads as a
+   real sheet rather than a flat fill. Dark/Dracula stays flat. */
+:root[data-theme="light"] body {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27160%27%3E%3Cfilter%20id%3D%27n%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.85%27%20numOctaves%3D%272%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.5%20%200%200%200%200%200.5%20%200%200%200%200%200.5%20%200%200%200%200.25%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20filter%3D%27url%28%23n%29%27%2F%3E%3C%2Fsvg%3E");
+  background-repeat: repeat;
+  background-size: 160px 160px;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -46,6 +73,7 @@ body {
   transition: background 0.2s ease, color 0.2s ease;
   overflow-x: clip;
 }
+
 
 code,
 pre,
@@ -80,6 +108,16 @@ header.site {
   border-bottom: 1px solid var(--border);
 }
 
+/* The sticky header has its own translucent paper background, so it
+   doesn't sit over the body grain the way the transparent footer does.
+   Give it the same grain so the whole frame reads as one sheet. */
+:root[data-theme="light"] header.site {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27160%27%3E%3Cfilter%20id%3D%27n%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.85%27%20numOctaves%3D%272%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.5%20%200%200%200%200%200.5%20%200%200%200%200%200.5%20%200%200%200%200.25%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20filter%3D%27url%28%23n%29%27%2F%3E%3C%2Fsvg%3E");
+  background-repeat: repeat;
+  background-size: 160px 160px;
+}
+
+
 header.site .wrap {
   display: flex;
   align-items: center;
@@ -88,7 +126,10 @@ header.site .wrap {
 }
 
 .wordmark {
-  font-weight: 650;
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1;
   color: var(--text);
   letter-spacing: 0.01em;
 }
@@ -101,7 +142,9 @@ header.site nav {
   display: flex;
   gap: 1.1rem;
   margin-left: auto;
-  font-size: 0.92rem;
+  font-family: var(--font-hand);
+  font-weight: 600;
+  font-size: 1.15rem;
 }
 
 header.site nav a {
@@ -159,54 +202,104 @@ header.site nav a {
 }
 
 .hero h1 {
-  font-size: clamp(2.1rem, 5vw, 3rem);
-  margin: 0 0 0.6rem;
-  letter-spacing: -0.015em;
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: clamp(3rem, 7vw, 4.4rem);
+  line-height: 1.05;
+  margin: 0 0 0.4rem;
+  letter-spacing: 0.005em;
 }
 
 .hero p.tag {
-  font-size: 1.2rem;
+  font-family: var(--font-hand);
+  font-weight: 600;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
   color: var(--muted);
   margin: 0 auto 1rem;
   max-width: 34em;
 }
 
 .hero p.sub {
-  color: var(--faint);
-  max-width: 40em;
+  font-family: var(--font-hand);
+  font-weight: 600;
+  font-size: 1.3rem;
+  line-height: 1.35;
+  color: var(--muted);
+  max-width: 34em;
   margin: 0 auto;
+}
+
+/* Dark theme: the project names take the accent pink so they stand out from
+   the purple descriptions. Light/notebook keeps its ink-on-paper titles. */
+:root[data-theme="dark"] .project-table td.title .no-link {
+  color: var(--accent);
 }
 
 /* ---------- projects table ---------- */
 
+/* The hero stays at the readable 880px column; the projects band breaks out to
+   span the viewport, centered, and holds the resizable sheet. (body {
+   overflow-x: clip } absorbs the breakout's phantom width.) */
 section.projects {
   padding: 1rem 0 4rem;
+  display: flex;
+  justify-content: center;
+  width: 85vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+/* The notebook sheet wraps the table. A script (index.astro) makes it
+   resizable by dragging anywhere on its border, and resets it to 85% of the
+   page on a double-click of the border. overflow:hidden clips rows to the
+   rounded corners; the flex parent keeps it centered, so it grows
+   symmetrically. */
+.sheet {
+  position: relative;
+  width: min(1180px, 85vw);
+  max-width: 100%;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 2px var(--shadow),
+    0 24px 60px color-mix(in srgb, var(--text) 10%, transparent);
+  transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* no width transition while actively dragging; show the resize cursor */
+.sheet.dragging {
+  transition: none;
+  cursor: ew-resize;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    transition: none;
+  }
 }
 
 .project-table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 12px 40px var(--shadow);
 }
 
 .project-table thead th {
   text-align: left;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--faint);
-  padding: 0.7rem 1rem;
+  padding: 0.85rem 1.5rem;
   border-bottom: 1px solid var(--border);
   background: color-mix(in srgb, var(--faint) 7%, transparent);
 }
 
 .project-table tbody td {
-  padding: 0.85rem 1rem;
+  padding: 1.05rem 1.5rem;
   border-bottom: 1px solid var(--border);
   vertical-align: top;
 }
@@ -221,6 +314,19 @@ section.projects {
 
 .project-table tbody tr:hover {
   background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+/* Composition-notebook ruling, light theme only: the row dividers become
+   blue ruled lines, and the emoji column's right edge becomes a red margin
+   line running the height of the table. Dark theme keeps its subtle borders. */
+:root[data-theme="light"] .project-table thead th,
+:root[data-theme="light"] .project-table tbody td {
+  border-bottom-color: var(--rule);
+}
+
+:root[data-theme="light"] .project-table thead th:first-child,
+:root[data-theme="light"] .project-table td.emoji {
+  border-right: 1px solid var(--margin-line);
 }
 
 /* emoji cell: fixed, centered, a touch larger */
@@ -406,14 +512,43 @@ section.projects {
 footer.site {
   border-top: 1px solid var(--border);
   padding: 1.6rem 0 2.2rem;
-  font-size: 0.85rem;
+  font-family: var(--font-hand);
+  font-weight: 600;
+  font-size: 1.1rem;
   color: var(--faint);
   display: flow-root;
 }
 
 footer.site .wrap {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+footer.site .wrap > span:first-child {
+  justify-self: start;
+}
+
+footer.site .wrap > span:last-child {
+  justify-self: end;
+}
+
+.copyright {
+  justify-self: center;
+  text-align: center;
+  color: var(--faint);
+}
+
+@media (max-width: 560px) {
+  footer.site .wrap {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  footer.site .wrap > span:first-child,
+  footer.site .wrap > span:last-child {
+    justify-self: center;
+  }
 }
