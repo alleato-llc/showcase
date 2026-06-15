@@ -126,19 +126,17 @@ reintroduce it.
 
 ## Deploy / infra
 
-- `.github/workflows/ci.yml` (branches/PRs) and `deploy.yml` (main) publish via
-  GitHub OIDC → `aws s3 sync --delete` → CloudFront invalidate-by-alias (bucket
-  name == domain). Mirrors Soroban; `salpa`'s darwin-only binary is replaced by
-  the same aws-cli ops directly.
-- The engine deploys two sites: `landing/` → `showcase.alleato.dev`, and the
-  example instance build → `demo.showcase.alleato.dev`.
+- `.github/workflows/ci.yml` (branches/PRs) builds + vets; `deploy.yml` (main)
+  builds and publishes via [`salpa`](https://github.com/alleato-llc/salpa)
+  (`salpa deploy`). The engine publishes two sites: the `landing/` page and the
+  example-instance demo.
+- Hosting is provisioned **outside this repo**; the deploy workflow reads its
+  target from repo variables. Keep host-specific details out of the docs here.
 - Instances come in two shapes: **standalone** (scaffolded by
   `scripts/new-instance.sh` — a self-contained site copy + `data/`, builds on
   its own; `nycjv321/showcase` is this) or **thin** (content-only, CI checks the
   engine out as a sibling and builds with `SHOWCASE_DATA`). The standalone reads
   `./data` via `SHOWCASE_DATA=./data` in its npm scripts.
-- AWS resources + repo vars (`AWS_REGION`, `AWS_SITE_ROLE_ARN`) are documented
-  in `INFRA.md`; they're provisioned outside the repo.
 
 ## Visual verification
 

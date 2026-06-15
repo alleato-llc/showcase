@@ -87,21 +87,20 @@ defaults. The projects table is also a resizable "sheet" (drag the border,
 `npm run build` emits a static `packages/site/dist`. The flat-file build format
 (`build: { format: "file" }`) makes extensionless URLs resolve on hosts that
 append `.html`. Point `SHOWCASE_DATA` at an instance to build that portfolio.
+The `dist/` is plain static output — host it anywhere.
 
-This repo's own sites publish via GitHub Actions (OIDC → S3 → CloudFront
-invalidate; see **[`INFRA.md`](INFRA.md)** for the AWS prerequisites and the two
-repo variables `AWS_REGION` / `AWS_SITE_ROLE_ARN`):
+CI/deploy run via GitHub Actions:
 
 - **`.github/workflows/ci.yml`** — on branches/PRs: Go build/vet/test + Astro
   build + GUI frontend build.
-- **`.github/workflows/deploy.yml`** — on `main`: the **landing page**
-  (`landing/`) → `showcase.alleato.dev`, and the **live demo** (the example
-  instance) → `demo.showcase.alleato.dev`.
+- **`.github/workflows/deploy.yml`** — on `main`: builds the landing page and
+  the example-instance demo and publishes them. Hosting is provisioned
+  separately; the workflow reads its target from repo variables.
 
 ### Instances
 
 A portfolio is an **instance** — built from this engine, deployed to its own
-bucket/domain. Two shapes:
+host/domain. Two shapes:
 
 - **Standalone** (`scripts/new-instance.sh <dir> [--data <dir>] [--domain <host>]`)
   — scaffolds a self-contained copy of the site + a `data/` folder + a plain
