@@ -4,7 +4,10 @@ name: Deploy
 # demo (example instance) → demo.showcase.alleato.dev. salpa owns the deploy
 # (s3 sync + CloudFront invalidate); two runs, one per site, with dir/bucket
 # supplied via $SALPA_DIR / $SALPA_BUCKET (salpa >= 0.1.10). Auth is short-lived
-# OIDC. See INFRA.md for the AWS setup.
+# OIDC (secrets.AWS_SITE_ROLE_ARN — a secret, not a variable, so GitHub
+# auto-redacts it everywhere in logs; a manual ::add-mask:: step does not do
+# that, since the step's own `env:` block still gets echoed in its log
+# preamble before the mask takes effect).
 on:
   push:
     branches: [main]
@@ -56,16 +59,10 @@ jobs:
           chmod +x salpa-linux-amd64
           sudo mv salpa-linux-amd64 /usr/local/bin/salpa
 
-      - name: Mask account id
-        env:
-          ROLE_ARN: ${{ vars.AWS_SITE_ROLE_ARN }}
-        run: |
-          echo "::add-mask::$(printf '%s' "$ROLE_ARN" | cut -d: -f5)"
-
       - name: Configure deploy credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_SITE_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_SITE_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy landing page

@@ -72,8 +72,10 @@ name: Deploy
 
 # Self-contained: build this Astro site and publish to ${DOMAIN} via
 # OIDC -> S3 -> CloudFront invalidate. Needs an S3 bucket named after the
-# domain, a CloudFront distribution aliased to it, an OIDC deploy role, and the
-# repo vars AWS_REGION / AWS_SITE_ROLE_ARN.
+# domain, a CloudFront distribution aliased to it, an OIDC deploy role, the
+# repo variable AWS_REGION, and the repo SECRET AWS_SITE_ROLE_ARN (a secret,
+# not a variable: GitHub auto-redacts secrets everywhere in logs, which a
+# variable + a manual ::add-mask:: step does not do).
 on:
   push:
     branches: [main]
@@ -103,14 +105,9 @@ jobs:
       - run: |
           npm ci
           npm run build
-      - name: Mask account id
-        env:
-          ROLE_ARN: \${{ vars.AWS_SITE_ROLE_ARN }}
-        run: |
-          echo "::add-mask::\$(printf '%s' "\$ROLE_ARN" | cut -d: -f5)"
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: \${{ vars.AWS_SITE_ROLE_ARN }}
+          role-to-assume: \${{ secrets.AWS_SITE_ROLE_ARN }}
           aws-region: \${{ env.AWS_REGION }}
       - name: Deploy
         run: |
